@@ -1,5 +1,3 @@
-# saaro_health
-Saaro Health is a comprehensive clinic management system backend built with Node.js, Express, and MongoDB. It allows clinics to efficiently manage patients, doctors, and staff, while providing secure user authentication and role-based access control. 
 Saaro Health - Clinic Management System
 
 A Node.js + Express + MongoDB backend for managing a health clinic, including users, patients, doctors, and appointments. This project uses JWT authentication, role-based authorization, and Swagger API documentation.
