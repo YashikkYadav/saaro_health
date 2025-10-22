@@ -26,6 +26,7 @@ const registerUser = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
+      message: "User registered successfully",
       data: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (err) {
@@ -52,6 +53,7 @@ const loginUser = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
+      message: "Login successful",
       token,
       data: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
@@ -64,7 +66,7 @@ const loginUser = async (req, res, next) => {
 const getUsers = async (req, res, next) => {
   try {
     const users = await User.find().select("-password").lean();
-    res.status(200).json({ success: true, data: users });
+    res.status(200).json({ success: true, message: "Users fetched successfully", data: users });
   } catch (err) {
     next(err);
   }

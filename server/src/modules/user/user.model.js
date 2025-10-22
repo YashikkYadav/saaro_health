@@ -17,6 +17,17 @@ const userSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
     isBlocked: { type: Boolean, default: false },
     lastLogin: { type: Date, default: null },
+    // References based on role
+    doctorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Doctor",
+      default: null
+    },
+    patientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Patient",
+      default: null
+    }
   },
   { timestamps: true }
 );
