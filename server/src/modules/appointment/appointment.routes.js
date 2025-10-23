@@ -1,1 +1,750 @@
-// Appointment Routes
+const express = require('express');
+const { 
+  bookAppointment,
+  createAppointmentForDoctor,
+  getUpcomingAppointmentsForDoctor,
+  getLatestAppointmentForPatient,
+  getAppointmentsForPatient,
+  updateAppointmentStatus,
+  updateAppointment,
+  getAppointment,
+  deleteAppointmentController,
+  getSharedBookings,
+  getLocations,
+  getDates,
+  getTimeSlots
+} = require('./appointment.controller');
+
+const router = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Appointments
+ *   description: Appointment management
+ */
+
+/**
+ * @swagger
+ * /api/appointments/{doctorId}/book-appointment:
+ *   post:
+ *     summary: Book an appointment for a doctor
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - patientId
+ *               - date
+ *               - timeSlot
+ *               - location
+ *             properties:
+ *               patientId:
+ *                 type: string
+ *                 description: Patient ID
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 description: Appointment date (YYYY-MM-DD)
+ *               timeSlot:
+ *                 type: string
+ *                 description: Time slot for appointment
+ *               location:
+ *                 type: string
+ *                 description: Appointment location
+ *               notes:
+ *                 type: string
+ *                 description: Additional notes
+ *               fees:
+ *                 type: number
+ *                 description: Appointment fees
+ *     responses:
+ *       201:
+ *         description: Appointment booked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointment:
+ *                   $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// POST /:doctorId/book-appointment - Book an appointment for a doctor
+router.post('/:doctorId/book-appointment', bookAppointment);
+
+/**
+ * @swagger
+ * /api/appointments/{doctorId}:
+ *   post:
+ *     summary: Create an appointment for a doctor (admin/doctor)
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - patientId
+ *               - date
+ *               - timeSlot
+ *               - location
+ *             properties:
+ *               patientId:
+ *                 type: string
+ *                 description: Patient ID
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 description: Appointment date (YYYY-MM-DD)
+ *               timeSlot:
+ *                 type: string
+ *                 description: Time slot for appointment
+ *               location:
+ *                 type: string
+ *                 description: Appointment location
+ *               notes:
+ *                 type: string
+ *                 description: Additional notes
+ *               fees:
+ *                 type: number
+ *                 description: Appointment fees
+ *               status:
+ *                 type: string
+ *                 description: Appointment status
+ *     responses:
+ *       201:
+ *         description: Appointment created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointment:
+ *                   $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// POST /:doctorId - Create an appointment for a doctor (admin/doctor)
+router.post('/:doctorId', createAppointmentForDoctor);
+
+/**
+ * @swagger
+ * /api/appointments/{doctorId}/get-upcoming-appointments:
+ *   get:
+ *     summary: Get upcoming appointments for a doctor
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
+ *     responses:
+ *       200:
+ *         description: Upcoming appointments retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointments:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Appointment'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// GET /:doctorId/get-upcoming-appointments - Get upcoming appointments for a doctor
+router.get('/:doctorId/get-upcoming-appointments', getUpcomingAppointmentsForDoctor);
+
+/**
+ * @swagger
+ * /api/appointments/{patientId}/latest:
+ *   get:
+ *     summary: Get latest appointment for a patient
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: patientId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Patient ID
+ *     responses:
+ *       200:
+ *         description: Latest appointment retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointment:
+ *                   $ref: '#/components/schemas/Appointment'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// GET /:patientId/latest - Get latest appointment for a patient
+router.get('/:patientId/latest', getLatestAppointmentForPatient);
+
+/**
+ * @swagger
+ * /api/appointments/{patientId}:
+ *   get:
+ *     summary: Get all appointments for a patient
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: patientId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Patient ID
+ *     responses:
+ *       200:
+ *         description: Appointments retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointments:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Appointment'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// GET /:patientId - Get all appointments for a patient
+router.get('/:patientId', getAppointmentsForPatient);
+
+/**
+ * @swagger
+ * /api/appointments/update-status:
+ *   patch:
+ *     summary: Update appointment status
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - appointmentId
+ *               - status
+ *             properties:
+ *               appointmentId:
+ *                 type: string
+ *                 description: Appointment ID
+ *               status:
+ *                 type: string
+ *                 description: New appointment status
+ *     responses:
+ *       200:
+ *         description: Appointment status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointment:
+ *                   $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// PATCH /update-status - Update appointment status
+router.patch('/update-status', updateAppointmentStatus);
+
+/**
+ * @swagger
+ * /api/appointments/{appointmentId}:
+ *   patch:
+ *     summary: Update appointment
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: appointmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: date
+ *               timeSlot:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *               fees:
+ *                 type: number
+ *               status:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Appointment updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointment:
+ *                   $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// PATCH /:appointmentId - Update appointment
+router.patch('/:appointmentId', updateAppointment);
+
+/**
+ * @swagger
+ * /api/appointments/{appointmentId}:
+ *   get:
+ *     summary: Get appointment by ID
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: appointmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID
+ *     responses:
+ *       200:
+ *         description: Appointment retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointment:
+ *                   $ref: '#/components/schemas/Appointment'
+ *       404:
+ *         description: Appointment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// GET /:appointmentId - Get appointment by ID
+router.get('/:appointmentId', getAppointment);
+
+/**
+ * @swagger
+ * /api/appointments/{appointmentId}:
+ *   delete:
+ *     summary: Delete appointment
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: appointmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID
+ *     responses:
+ *       200:
+ *         description: Appointment deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Appointment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// DELETE /:appointmentId - Delete appointment
+router.delete('/:appointmentId', deleteAppointmentController);
+
+/**
+ * @swagger
+ * /api/appointments/{doctorId}/locations:
+ *   get:
+ *     summary: Get appointment locations for a doctor
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
+ *     responses:
+ *       200:
+ *         description: Locations retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 locations:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       address:
+ *                         type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// GET /:doctorId/locations - Get appointment locations for a doctor
+router.get('/:doctorId/locations', getLocations);
+
+/**
+ * @swagger
+ * /api/appointments/{doctorId}/{locationId}/dates:
+ *   get:
+ *     summary: Get appointment dates for a doctor at a location
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
+ *       - in: path
+ *         name: locationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Location ID
+ *     responses:
+ *       200:
+ *         description: Dates retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 dates:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     format: date
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// GET /:doctorId/:locationId/dates - Get appointment dates for a doctor at a location
+router.get('/:doctorId/:locationId/dates', getDates);
+
+/**
+ * @swagger
+ * /api/appointments/{doctorId}/{locationId}/date/{date}:
+ *   get:
+ *     summary: Get appointment time slots for a doctor at a location on a specific date
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
+ *       - in: path
+ *         name: locationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Location ID
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Date (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Time slots retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 timeSlots:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       startTime:
+ *                         type: string
+ *                       endTime:
+ *                         type: string
+ *                       isBooked:
+ *                         type: boolean
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// GET /:doctorId/:locationId/date/:date - Get appointment time slots for a doctor at a location on a specific date
+router.get('/:doctorId/:locationId/date/:date', getTimeSlots);
+
+/**
+ * @swagger
+ * /api/appointments/{doctorId}/shared-bookings:
+ *   get:
+ *     summary: Get shared bookings for a doctor
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
+ *     responses:
+ *       200:
+ *         description: Shared bookings retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 appointments:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Appointment'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// GET /:doctorId/shared-bookings - Get shared bookings for a doctor
+router.get('/:doctorId/shared-bookings', getSharedBookings);
+
+module.exports = router;

@@ -318,6 +318,166 @@ const options = {
               description: "Update timestamp"
             }
           }
+        },
+        Appointment: {
+          type: "object",
+          properties: {
+            _id: {
+              type: "string",
+              description: "Appointment ID"
+            },
+            doctorId: {
+              type: "string",
+              description: "Doctor ID"
+            },
+            patientId: {
+              type: "string",
+              description: "Patient ID"
+            },
+            location: {
+              type: "string",
+              description: "Appointment location"
+            },
+            date: {
+              type: "string",
+              format: "date",
+              description: "Appointment date"
+            },
+            time: {
+              type: "string",
+              description: "Appointment time"
+            },
+            type: {
+              type: "string",
+              description: "Appointment type"
+            },
+            markComplete: {
+              type: "boolean",
+              description: "Whether appointment is marked complete"
+            },
+            status: {
+              type: "string",
+              description: "Appointment status"
+            },
+            source: {
+              type: "string",
+              enum: ["manual", "public_booking", "qr_code", "whatsapp"],
+              description: "Appointment source"
+            },
+            reason: {
+              type: "string",
+              description: "Appointment reason"
+            },
+            email: {
+              type: "string",
+              format: "email",
+              description: "Patient email"
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Creation timestamp"
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Update timestamp"
+            }
+          }
+        },
+        Invoice: {
+          type: "object",
+          properties: {
+            _id: {
+              type: "string",
+              description: "Invoice ID"
+            },
+            doctorId: {
+              type: "string",
+              description: "Doctor ID"
+            },
+            patientId: {
+              type: "string",
+              description: "Patient ID"
+            },
+            invoiceId: {
+              type: "string",
+              description: "Invoice ID"
+            },
+            name: {
+              type: "string",
+              description: "Invoice name"
+            },
+            uid: {
+              type: "string",
+              description: "Unique identifier"
+            },
+            phone: {
+              type: "string",
+              description: "Phone number"
+            },
+            paymentStatus: {
+              type: "string",
+              enum: ["Unbilled", "Billed", "Paid", "Overdue"],
+              description: "Invoice payment status"
+            },
+            privateNote: {
+              type: "string",
+              description: "Private notes"
+            },
+            items: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  service: {
+                    type: "string",
+                    description: "Service description"
+                  },
+                  amount: {
+                    type: "number",
+                    description: "Service amount"
+                  },
+                  quantity: {
+                    type: "number",
+                    description: "Service quantity"
+                  },
+                  discount: {
+                    type: "number",
+                    description: "Service discount"
+                  }
+                }
+              },
+              description: "Invoice items"
+            },
+            additionalDiscountAmount: {
+              type: "number",
+              description: "Additional discount amount"
+            },
+            totalAmount: {
+              type: "number",
+              description: "Invoice total amount"
+            },
+            paymentMode: {
+              type: "string",
+              enum: ["Cash", "Card", "UPI", "Bank Transfer"],
+              description: "Invoice payment method"
+            },
+            patientNote: {
+              type: "string",
+              description: "Patient notes"
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Creation timestamp"
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Update timestamp"
+            }
+          }
         }
       }
     },

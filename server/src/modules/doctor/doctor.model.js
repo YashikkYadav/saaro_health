@@ -80,6 +80,7 @@ const doctorSchema = new mongoose.Schema(
     ref: "Patient",
      },
    ],
+   
 
    appointments: [
        {
@@ -87,38 +88,10 @@ const doctorSchema = new mongoose.Schema(
     ref: "Appointment",
      },
    ],
-   
-   prescriptions: [
-       {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Prescription",
-     },
-   ],
-   
-   documents: [
-       {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Document",
-     },
-   ],
-   
-   invoices: [
-       {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Invoice",
-     },
-   ],
-   
-   messages: [
-       {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Message",
-     },
-   ],
   },
   { timestamps: true }
 );
 
-const DoctorModal = mongoose.model('Doctor', doctorSchema);
+const Doctor = mongoose.model('Doctor', doctorSchema);
 
-module.exports = DoctorModal;
+module.exports = Doctor;
