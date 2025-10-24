@@ -478,7 +478,245 @@ const options = {
               description: "Update timestamp"
             }
           }
-        }
+        },
+        Prescription: {
+          type: "object",
+          properties: {
+            _id: {
+              type: "string",
+              description: "Prescription ID"
+            },
+            doctorId: {
+              type: "string",
+              description: "Doctor ID"
+            },
+            patientId: {
+              type: "string",
+              description: "Patient ID"
+            },
+            vitals: {
+              type: "object",
+              properties: {
+                bloodPressure: {
+                  type: "string"
+                },
+                pulse: {
+                  type: "string"
+                },
+                height: {
+                  type: "string"
+                },
+                weight: {
+                  type: "string"
+                },
+                temperature: {
+                  type: "string"
+                },
+                painScore: {
+                  type: "string"
+                },
+                oxygenSaturation: {
+                  type: "string"
+                },
+                respiratoryRate: {
+                  type: "string"
+                }
+              },
+              description: "Patient vitals"
+            },
+            complaints: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  text: {
+                    type: "string"
+                  },
+                  id: {
+                    type: "string"
+                  }
+                }
+              },
+              description: "Chief complaints"
+            },
+            pastHistory: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  value: {
+                    type: "string"
+                  },
+                  id: {
+                    type: "string"
+                  }
+                }
+              },
+              description: "Past medical history"
+            },
+            surgicalHistory: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  value: {
+                    type: "string"
+                  },
+                  id: {
+                    type: "string"
+                  }
+                }
+              },
+              description: "Surgical history"
+            },
+            drugAllergy: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  value: {
+                    type: "string"
+                  },
+                  id: {
+                    type: "string"
+                  }
+                }
+              },
+              description: "Drug allergies"
+            },
+            physicalExamination: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  text: {
+                    type: "string"
+                  },
+                  id: {
+                    type: "string"
+                  }
+                }
+              },
+              description: "Physical examination findings"
+            },
+            diagnosis: {
+              type: "object",
+              properties: {
+                provisional: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      value: {
+                        type: "string"
+                      },
+                      id: {
+                        type: "string"
+                      }
+                    }
+                  }
+                },
+                final: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      value: {
+                        type: "string"
+                      },
+                      id: {
+                        type: "string"
+                      }
+                    }
+                  }
+                }
+              },
+              description: "Diagnosis information"
+            },
+            tests: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  value: {
+                    type: "string"
+                  },
+                  id: {
+                    type: "string"
+                  }
+                }
+              },
+              description: "Investigation tests"
+            },
+            medication: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: {
+                    type: "string"
+                  },
+                  dosage: {
+                    type: "string"
+                  },
+                  frequency: {
+                    type: "string"
+                  },
+                  duration: {
+                    type: "string"
+                  },
+                  notes: {
+                    type: "string"
+                  },
+                  id: {
+                    type: "string"
+                  }
+                }
+              },
+              description: "Medications prescribed"
+            },
+            advice: {
+              type: "string",
+              description: "Medical advice"
+            },
+            followUp: {
+              type: "array",
+              items: {
+                type: "string"
+              },
+              description: "Follow-up instructions"
+            },
+            status: {
+              type: "string",
+              enum: ["draft", "complete", "archived"],
+              description: "Prescription status"
+            },
+            consultationDate: {
+              type: "string",
+              format: "date-time",
+              description: "Consultation date"
+            },
+            consultationType: {
+              type: "string",
+              enum: ["general", "followup", "emergency", "specialty"],
+              description: "Type of consultation"
+            },
+            notes: {
+              type: "string",
+              description: "Additional notes"
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Creation timestamp"
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Update timestamp"
+            }
+          }
+        },
       }
     },
     security: [{ bearerAuth: [] }]

@@ -21,7 +21,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/{doctorId}/invoice:
+ * /api/invoices/{doctorId}/invoice:
  *   post:
  *     summary: Create an invoice
  *     tags: [Invoices]
@@ -125,7 +125,7 @@ router.post('/:doctorId/invoice', createInvoice);
 
 /**
  * @swagger
- * /api/{doctorId}/invoice/update:
+ * /api/invoices/{doctorId}/invoice/update:
  *   post:
  *     summary: Update an invoice by invoiceId
  *     tags: [Invoices]
@@ -225,7 +225,7 @@ router.post('/:doctorId/invoice/update', updateInvoiceByInvoiceId);
 
 /**
  * @swagger
- * /api/{doctorId}/invoice:
+ * /api/invoices/{doctorId}/invoice:
  *   get:
  *     summary: Get invoices by doctor ID
  *     tags: [Invoices]
@@ -291,7 +291,7 @@ router.get('/:doctorId/invoice', getInvoices);
 
 /**
  * @swagger
- * /api/{doctorId}/invoice/export:
+ * /api/invoices/{doctorId}/invoice/export:
  *   get:
  *     summary: Export invoices
  *     tags: [Invoices]
@@ -308,7 +308,7 @@ router.get('/:doctorId/invoice', getInvoices);
  *         name: format
  *         schema:
  *           type: string
- *           enum: [csv, xlsx]
+ *           enum: [pdf, csv, xlsx]
  *         description: Export format
  *       - in: query
  *         name: dateRange
@@ -336,14 +336,10 @@ router.get('/:doctorId/invoice', getInvoices);
  *       200:
  *         description: Invoice data exported successfully
  *         content:
- *           application/json:
+ *           application/octet-stream:
  *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
+ *               type: string
+ *               format: binary
  *       500:
  *         description: Internal server error
  *         content:
@@ -362,7 +358,7 @@ router.get('/:doctorId/invoice/export', exportInvoiceData);
 
 /**
  * @swagger
- * /api/{doctorId}/invoice/{invoiceId}:
+ * /api/invoices/{doctorId}/invoice/{invoiceId}:
  *   put:
  *     summary: Update an invoice
  *     tags: [Invoices]
@@ -457,7 +453,7 @@ router.put('/:doctorId/invoice/:invoiceId', updateInvoiceController);
 
 /**
  * @swagger
- * /api/{doctorId}/invoice/{invoiceId}:
+ * /api/invoices/{doctorId}/invoice/{invoiceId}:
  *   get:
  *     summary: Get invoice by ID
  *     tags: [Invoices]
@@ -508,7 +504,7 @@ router.get('/:doctorId/invoice/:invoiceId', getInvoice);
 
 /**
  * @swagger
- * /api/{doctorId}/invoice/{invoiceId}:
+ * /api/invoices/{doctorId}/invoice/{invoiceId}:
  *   delete:
  *     summary: Delete an invoice
  *     tags: [Invoices]
@@ -559,7 +555,7 @@ router.delete('/:doctorId/invoice/:invoiceId', deleteInvoiceController);
 
 /**
  * @swagger
- * /api/{doctorId}/invoice/{invoiceId}/print:
+ * /api/invoices/{doctorId}/invoice/{invoiceId}/print:
  *   get:
  *     summary: Print an invoice
  *     tags: [Invoices]

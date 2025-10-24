@@ -8,6 +8,8 @@ const {
   deleteInvoice,
   printInvoice
 } = require('./invoice.service');
+const path = require('path');
+const fs = require('fs');
 
 // Create invoice
 const createInvoice = async (req, res) => {
@@ -15,9 +17,12 @@ const createInvoice = async (req, res) => {
     const { doctorId } = req.params;
     const invoiceData = req.body;
     
+    
     const result = await createInvoiceService(doctorId, invoiceData);
+  
     
     if (result.statusCode >= 400) {
+      // console.log('Invoice creation failed:', result.error);
       return res.status(result.statusCode).json({
         success: false,
         message: result.error
@@ -31,6 +36,7 @@ const createInvoice = async (req, res) => {
       invoiceUrl: result.invoiceUrl
     });
   } catch (error) {
+    console.error('Error creating invoice:', error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -98,20 +104,53 @@ const exportInvoiceData = async (req, res) => {
     const { doctorId } = req.params;
     const { format, dateRange, statusFilter, modeFilter, searchQuery } = req.query;
     
+    // Log the filters for debugging
+    // console.log('Export filters:', { format, dateRange, statusFilter, modeFilter, searchQuery });
+    
     const exportResult = await exportInvoices(doctorId, format, dateRange, statusFilter, modeFilter, searchQuery);
     
-    // In a real implementation, this would return an actual file download
-    // For now, we'll return the data with a message
-    res.status(200).json({
-      success: true,
-      message: `Invoice data exported successfully in ${format} format`,
-      ...exportResult
+    // Send the file for download
+    res.setHeader('Content-Disposition', `attachment; filename="${exportResult.fileName}"`);
+    res.setHeader('Content-Type', getContentType(exportResult.format));
+    
+    const fileStream = fs.createReadStream(exportResult.filePath);
+    fileStream.pipe(res);
+    
+    // Delete the file after sending it
+    fileStream.on('close', () => {
+      fs.unlink(exportResult.filePath, (err) => {
+        if (err) {
+          console.error('Error deleting temp file:', err);
+        }
+      });
+    });
+    
+    fileStream.on('error', (err) => {
+      res.status(500).json({
+        success: false,
+        message: 'Error exporting invoices'
+      });
     });
   } catch (error) {
+    console.error('Error exporting invoices:', error);
     res.status(500).json({
       success: false,
       message: error.message
     });
+  }
+};
+
+// Helper function to get content type based on format
+const getContentType = (format) => {
+  switch (format.toLowerCase()) {
+    case 'pdf':
+      return 'application/pdf';
+    case 'csv':
+      return 'text/csv';
+    case 'xlsx':
+      return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    default:
+      return 'application/octet-stream';
   }
 };
 
@@ -191,10 +230,27 @@ const printInvoiceController = async (req, res) => {
     
     const printResult = await printInvoice(doctorId, invoiceId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Invoice print data retrieved successfully',
-      ...printResult
+    // Send the PDF file for download
+    res.setHeader('Content-Disposition', `attachment; filename="${printResult.fileName}"`);
+    res.setHeader('Content-Type', 'application/pdf');
+    
+    const fileStream = fs.createReadStream(printResult.filePath);
+    fileStream.pipe(res);
+    
+    // Delete the file after sending it
+    fileStream.on('close', () => {
+      fs.unlink(printResult.filePath, (err) => {
+        if (err) {
+          console.error('Error deleting temp file:', err);
+        }
+      });
+    });
+    
+    fileStream.on('error', (err) => {
+      res.status(500).json({
+        success: false,
+        message: 'Error generating invoice PDF'
+      });
     });
   } catch (error) {
     res.status(404).json({

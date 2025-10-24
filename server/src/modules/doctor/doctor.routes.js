@@ -273,12 +273,19 @@ router.get('/:doctorId', getDoctor);
 
 /**
  * @swagger
- * /api/doctors/change-password:
+ * /api/doctors/{doctorId}/change-password:
  *   put:
  *     summary: Change doctor password
  *     tags: [Doctors]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
  *     requestBody:
  *       required: true
  *       content:
@@ -322,8 +329,9 @@ router.get('/:doctorId', getDoctor);
  *                   type: string
  */
 
-// PUT /change-password - Change password
-router.put('/change-password', changePasswordController);
+// PUT /:doctorId/change-password - Change password
+
+router.put('/:doctorId/change-password', changePasswordController);
 
 /**
  * @swagger
