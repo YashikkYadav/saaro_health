@@ -12,8 +12,10 @@ const {
   getAppointmentTimeSlots,
   bookAppointmentService,
   createAppointmentForDoctorService,
-  updateAppointmentStatusByIdService
+  updateAppointmentStatusByIdService,
+  updateAppointment
 } = require('./appointment.service');
+const apiResponse = require('../../utils/apiResponse.utils');
 
 // Book an appointment for a doctor
 const bookAppointment = async (req, res) => {
@@ -22,16 +24,9 @@ const bookAppointment = async (req, res) => {
     const appointmentData = { ...req.body, doctorId };
     const appointment = await bookAppointmentService(appointmentData);
     
-    res.status(201).json({
-      success: true,
-      message: 'Appointment booked successfully',
-      appointment
-    });
+    return apiResponse.success(res, 'Appointment booked successfully', { appointment }, 201);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
@@ -42,16 +37,9 @@ const createAppointmentForDoctor = async (req, res) => {
     const appointmentData = { ...req.body, doctorId };
     const appointment = await createAppointmentForDoctorService(appointmentData);
     
-    res.status(201).json({
-      success: true,
-      message: 'Appointment created successfully',
-      appointment
-    });
+    return apiResponse.success(res, 'Appointment created successfully', { appointment }, 201);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
@@ -62,16 +50,9 @@ const getUpcomingAppointmentsForDoctor = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
     const result = await getUpcomingAppointmentsByDoctorId(doctorId, parseInt(page), parseInt(limit));
     
-    res.status(200).json({
-      success: true,
-      message: 'Upcoming appointments retrieved successfully',
-      ...result
-    });
+    return apiResponse.success(res, 'Upcoming appointments retrieved successfully', result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -81,16 +62,9 @@ const getLatestAppointmentForPatient = async (req, res) => {
     const { patientId } = req.params;
     const appointment = await getLatestAppointmentByPatientId(patientId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Latest appointment retrieved successfully',
-      appointment
-    });
+    return apiResponse.success(res, 'Latest appointment retrieved successfully', { appointment });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -101,16 +75,9 @@ const getAppointmentsForPatient = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
     const result = await getAppointmentsByPatientId(patientId, parseInt(page), parseInt(limit));
     
-    res.status(200).json({
-      success: true,
-      message: 'Appointments retrieved successfully',
-      ...result
-    });
+    return apiResponse.success(res, 'Appointments retrieved successfully', result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -120,36 +87,22 @@ const updateAppointmentStatus = async (req, res) => {
     const { appointmentId, status } = req.body;
     const appointment = await updateAppointmentStatusByIdService(appointmentId, status);
     
-    res.status(200).json({
-      success: true,
-      message: 'Appointment status updated successfully',
-      appointment
-    });
+    return apiResponse.success(res, 'Appointment status updated successfully', { appointment });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
 // Update appointment
-const updateAppointment = async (req, res) => {
+const updateAppointmentController = async (req, res) => {
   try {
     const { appointmentId } = req.params;
     const updateData = req.body;
-    const appointment = await updateAppointmentService(appointmentId, updateData);
+    const appointment = await updateAppointment(appointmentId, updateData);
     
-    res.status(200).json({
-      success: true,
-      message: 'Appointment updated successfully',
-      appointment
-    });
+    return apiResponse.success(res, 'Appointment updated successfully', { appointment });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
@@ -159,16 +112,9 @@ const getAppointment = async (req, res) => {
     const { appointmentId } = req.params;
     const appointment = await getAppointmentById(appointmentId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Appointment retrieved successfully',
-      appointment
-    });
+    return apiResponse.success(res, 'Appointment retrieved successfully', { appointment });
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -178,15 +124,9 @@ const deleteAppointmentController = async (req, res) => {
     const { appointmentId } = req.params;
     await deleteAppointment(appointmentId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Appointment deleted successfully'
-    });
+    return apiResponse.success(res, 'Appointment deleted successfully');
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -197,16 +137,9 @@ const getSharedBookings = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
     const result = await getSharedBookingsByDoctorId(doctorId, parseInt(page), parseInt(limit));
     
-    res.status(200).json({
-      success: true,
-      message: 'Shared bookings retrieved successfully',
-      ...result
-    });
+    return apiResponse.success(res, 'Shared bookings retrieved successfully', result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -216,16 +149,9 @@ const getLocations = async (req, res) => {
     const { doctorId } = req.params;
     const locations = await getAppointmentLocations(doctorId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Locations retrieved successfully',
-      locations
-    });
+    return apiResponse.success(res, 'Locations retrieved successfully', { locations });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -235,16 +161,9 @@ const getDates = async (req, res) => {
     const { doctorId, locationId } = req.params;
     const dates = await getAppointmentDates(doctorId, locationId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Dates retrieved successfully',
-      dates
-    });
+    return apiResponse.success(res, 'Dates retrieved successfully', { dates });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -254,16 +173,9 @@ const getTimeSlots = async (req, res) => {
     const { doctorId, locationId, date } = req.params;
     const timeSlots = await getAppointmentTimeSlots(doctorId, locationId, date);
     
-    res.status(200).json({
-      success: true,
-      message: 'Time slots retrieved successfully',
-      timeSlots
-    });
+    return apiResponse.success(res, 'Time slots retrieved successfully', { timeSlots });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -274,7 +186,7 @@ module.exports = {
   getLatestAppointmentForPatient,
   getAppointmentsForPatient,
   updateAppointmentStatus,
-  updateAppointment,
+  updateAppointment: updateAppointmentController,
   getAppointment,
   deleteAppointmentController,
   getSharedBookings,

@@ -48,28 +48,43 @@ const router = express.Router();
  *             required:
  *               - patientId
  *               - date
- *               - timeSlot
+ *               - time
  *               - location
+ *               - type
  *             properties:
  *               patientId:
  *                 type: string
  *                 description: Patient ID
  *               date:
  *                 type: string
- *                 format: date
- *                 description: Appointment date (YYYY-MM-DD)
- *               timeSlot:
+ *                 format: date-time
+ *                 description: Appointment date and time
+ *               time:
  *                 type: string
- *                 description: Time slot for appointment
+ *                 description: Appointment time
  *               location:
  *                 type: string
  *                 description: Appointment location
+ *               type:
+ *                 type: string
+ *                 description: Appointment type
  *               notes:
  *                 type: string
  *                 description: Additional notes
  *               fees:
  *                 type: number
  *                 description: Appointment fees
+ *               reason:
+ *                 type: string
+ *                 description: Appointment reason
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Patient email
+ *               source:
+ *                 type: string
+ *                 enum: [manual, public_booking, qr_code, whatsapp]
+ *                 description: Appointment source
  *     responses:
  *       201:
  *         description: Appointment booked successfully
@@ -124,22 +139,26 @@ router.post('/:doctorId/book-appointment', bookAppointment);
  *             required:
  *               - patientId
  *               - date
- *               - timeSlot
+ *               - time
  *               - location
+ *               - type
  *             properties:
  *               patientId:
  *                 type: string
  *                 description: Patient ID
  *               date:
  *                 type: string
- *                 format: date
- *                 description: Appointment date (YYYY-MM-DD)
- *               timeSlot:
+ *                 format: date-time
+ *                 description: Appointment date and time
+ *               time:
  *                 type: string
- *                 description: Time slot for appointment
+ *                 description: Appointment time
  *               location:
  *                 type: string
  *                 description: Appointment location
+ *               type:
+ *                 type: string
+ *                 description: Appointment type
  *               notes:
  *                 type: string
  *                 description: Additional notes
@@ -149,6 +168,17 @@ router.post('/:doctorId/book-appointment', bookAppointment);
  *               status:
  *                 type: string
  *                 description: Appointment status
+ *               reason:
+ *                 type: string
+ *                 description: Appointment reason
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Patient email
+ *               source:
+ *                 type: string
+ *                 enum: [manual, public_booking, qr_code, whatsapp]
+ *                 description: Appointment source
  *     responses:
  *       201:
  *         description: Appointment created successfully
@@ -396,8 +426,8 @@ router.patch('/update-status', updateAppointmentStatus);
  *             properties:
  *               date:
  *                 type: string
- *                 format: date
- *               timeSlot:
+ *                 format: date-time
+ *               time:
  *                 type: string
  *               location:
  *                 type: string
@@ -406,6 +436,16 @@ router.patch('/update-status', updateAppointmentStatus);
  *               fees:
  *                 type: number
  *               status:
+ *                 type: string
+ *               reason:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               source:
+ *                 type: string
+ *                 enum: [manual, public_booking, qr_code, whatsapp]
+ *               type:
  *                 type: string
  *     responses:
  *       200:

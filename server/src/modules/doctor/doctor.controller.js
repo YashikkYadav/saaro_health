@@ -11,6 +11,7 @@ const {
   getDoctorsByCityOrSpecialty,
   getAvailableDates
 } = require('./doctor.service');
+const apiResponse = require('../../utils/apiResponse.utils');
 
 // Register a new doctor
 const register = async (req, res) => {
@@ -18,17 +19,12 @@ const register = async (req, res) => {
     const doctorData = req.body;
     const result = await registerDoctor(doctorData); 
     
-    res.status(201).json({
-      success: true,
-      message: 'Doctor registered successfully',
+    return apiResponse.success(res, 'Doctor registered successfully', {
       doctor: result.doctor,
       token: result.token
-    });
+    }, 201);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
@@ -38,17 +34,12 @@ const login = async (req, res) => {
     const { identifier, password } = req.body;
     const result = await loginDoctor(identifier, password);
     
-    res.status(200).json({
-      success: true,
-      message: 'Doctor logged in successfully',
+    return apiResponse.success(res, 'Doctor logged in successfully', {
       doctor: result.doctor,
       token: result.token
     });
   } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 401);
   }
 };
 
@@ -57,15 +48,9 @@ const logout = async (req, res) => {
   try {
     await logoutDoctor();
     
-    res.status(200).json({
-      success: true,
-      message: 'Logged out successfully'
-    });
+    return apiResponse.success(res, 'Logged out successfully');
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -74,16 +59,9 @@ const getFirst = async (req, res) => {
   try {
     const doctor = await getFirstDoctor();
     
-    res.status(200).json({
-      success: true,
-      message: 'First doctor retrieved successfully',
-      doctor: doctor
-    });
+    return apiResponse.success(res, 'First doctor retrieved successfully', { doctor });
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -93,16 +71,9 @@ const getDoctor = async (req, res) => {
     const { doctorId } = req.params;
     const doctor = await getDoctorById(doctorId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Doctor retrieved successfully',
-      doctor: doctor
-    });
+    return apiResponse.success(res, 'Doctor retrieved successfully', { doctor });
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -113,15 +84,9 @@ const changePasswordController = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     await changePassword(doctorId, currentPassword, newPassword);
     
-    res.status(200).json({
-      success: true,
-      message: 'Password changed successfully'
-    });
+    return apiResponse.success(res, 'Password changed successfully');
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
@@ -132,16 +97,9 @@ const updateProfileController = async (req, res) => {
     const updateData = req.body;
     const updatedDoctor = await updateProfile(doctorId, updateData);
     
-    res.status(200).json({
-      success: true,
-      message: 'Profile updated successfully',
-      doctor: updatedDoctor
-    });
+    return apiResponse.success(res, 'Profile updated successfully', { doctor: updatedDoctor });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
@@ -151,15 +109,9 @@ const deleteDoctorController = async (req, res) => {
     const { doctorId } = req.params;
     await deleteDoctor(doctorId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Doctor deleted successfully'
-    });
+    return apiResponse.success(res, 'Doctor deleted successfully');
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -168,16 +120,9 @@ const getDoctors = async (req, res) => {
   try {
     const doctors = await getAllDoctors();
     
-    res.status(200).json({
-      success: true,
-      message: 'Doctors retrieved successfully',
-      doctors: doctors
-    });
+    return apiResponse.success(res, 'Doctors retrieved successfully', { doctors });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -187,16 +132,9 @@ const getDoctorsByCityOrSpecialtyController = async (req, res) => {
     const { city, specialty } = req.body;
     const doctors = await getDoctorsByCityOrSpecialty(city, specialty);
     
-    res.status(200).json({
-      success: true,
-      message: 'Doctors retrieved successfully',
-      doctors: doctors
-    });
+    return apiResponse.success(res, 'Doctors retrieved successfully', { doctors });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -206,24 +144,14 @@ const getAvailableDatesController = async (req, res) => {
     const { doctorId } = req.body;
     
     if (!doctorId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Doctor ID is required'
-      });
+      return apiResponse.error(res, 'Doctor ID is required', 400);
     }
     
     const availableDates = await getAvailableDates(doctorId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Available dates retrieved successfully',
-      availableDates: availableDates
-    });
+    return apiResponse.success(res, 'Available dates retrieved successfully', { availableDates });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 

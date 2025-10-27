@@ -6,26 +6,19 @@ const {
   getInvoice12MonthsReportService,
   getPayment12MonthsReportService,
   getComparisonDataService,
-  getTodayAppointmentsPaginatedService,
   getPlannedSurgeriesPaginatedService,
   dashboardKPIsService
 } = require('./dashboard.service');
+const apiResponse = require('../../utils/apiResponse.utils');
 
 // Get patient 24 hour report
 const getPatient24HourReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const result = await getPatient24HourReportService(doctorId);
-    res.status(200).json({
-      success: true,
-      message: '24 hour patient report retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, '24 hour patient report retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -34,16 +27,9 @@ const getPatient30DaysReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const result = await getPatient30DaysReportService(doctorId);
-    res.status(200).json({
-      success: true,
-      message: '30 days patient report retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, '30 days patient report retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -52,16 +38,9 @@ const getPatient12MonthsReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const result = await getPatient12MonthsReportService(doctorId);
-    res.status(200).json({
-      success: true,
-      message: '12 months patient report retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, '12 months patient report retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -70,16 +49,9 @@ const getAppointmentTypeReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const result = await getAppointmentTypeReportService(doctorId);
-    res.status(200).json({
-      success: true,
-      message: 'Appointment type report retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, 'Appointment type report retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -88,16 +60,9 @@ const getInvoice12MonthsReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const result = await getInvoice12MonthsReportService(doctorId);
-    res.status(200).json({
-      success: true,
-      message: '12 months invoice report retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, '12 months invoice report retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -106,16 +71,9 @@ const getPayment12MonthsReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const result = await getPayment12MonthsReportService(doctorId);
-    res.status(200).json({
-      success: true,
-      message: '12 months payment report retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, '12 months payment report retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -124,16 +82,9 @@ const getComparisonData = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const result = await getComparisonDataService(doctorId);
-    res.status(200).json({
-      success: true,
-      message: 'Comparison data retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, 'Comparison data retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -143,16 +94,9 @@ const getTodayAppointmentsPaginated = async (req, res) => {
     const { doctorId } = req.params;
     const { page = 1, limit = 10 } = req.query;
     const result = await getTodayAppointmentsPaginatedService(doctorId, parseInt(page), parseInt(limit));
-    res.status(200).json({
-      success: true,
-      message: 'Today appointments retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, 'Today appointments retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -162,16 +106,9 @@ const getPlannedSurgeriesPaginated = async (req, res) => {
     const { doctorId } = req.params;
     const { page = 1, limit = 10 } = req.query;
     const result = await getPlannedSurgeriesPaginatedService(doctorId, parseInt(page), parseInt(limit));
-    res.status(200).json({
-      success: true,
-      message: 'Planned surgeries retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, 'Planned surgeries retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -180,16 +117,9 @@ const dashboardKPIs = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const result = await dashboardKPIsService(doctorId);
-    res.status(200).json({
-      success: true,
-      message: 'Dashboard KPIs retrieved successfully',
-      data: result
-    });
+    return apiResponse.success(res, 'Dashboard KPIs retrieved successfully', { result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 

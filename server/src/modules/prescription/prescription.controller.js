@@ -6,6 +6,7 @@ const {
   getDraftPrescription,
   getConsultationHistory
 } = require('./prescription.service');
+const apiResponse = require('../../utils/apiResponse.utils');
 
 /**
  * Create prescription
@@ -19,21 +20,14 @@ const createPrescriptionController = async (req, res) => {
     const result = await createPrescription(doctorId, patientId, prescriptionData);
 
     if (result.success) {
-      return res.status(201).json({
-        prescription: result.prescription,
-        message: result.message
-      });
+      return apiResponse.success(res, result.message, { 
+        prescription: result.prescription 
+      }, 201);
     } else {
-      return res.status(400).json({
-        message: result.message,
-        error: result.error
-      });
+      return apiResponse.error(res, result.message, 400, result.error);
     }
   } catch (error) {
-    return res.status(500).json({
-      message: 'Internal server error while creating prescription',
-      error: error.message
-    });
+    return apiResponse.error(res, 'Internal server error while creating prescription', 500, error.message);
   }
 };
 
@@ -49,22 +43,15 @@ const endConsultationController = async (req, res) => {
     const result = await endConsultation(doctorId, patientId, prescriptionData);
 
     if (result.success) {
-      return res.status(200).json({
+      return apiResponse.success(res, result.message, { 
         prescription: result.prescription,
-        pdfPath: result.pdfPath,
-        message: result.message
+        pdfPath: result.pdfPath
       });
     } else {
-      return res.status(400).json({
-        message: result.message,
-        error: result.error
-      });
+      return apiResponse.error(res, result.message, 400, result.error);
     }
   } catch (error) {
-    return res.status(500).json({
-      message: 'Internal server error while ending consultation',
-      error: error.message
-    });
+    return apiResponse.error(res, 'Internal server error while ending consultation', 500, error.message);
   }
 };
 
@@ -80,24 +67,14 @@ const savePastVisitController = async (req, res) => {
     const result = await savePastVisit(doctorId, patientId, consultationData);
 
     if (result.success) {
-      return res.status(201).json({
-        success: true,
-        prescription: result.prescription,
-        message: result.message
-      });
+      return apiResponse.success(res, result.message, { 
+        prescription: result.prescription 
+      }, 201);
     } else {
-      return res.status(400).json({
-        success: false,
-        message: result.message,
-        error: result.error
-      });
+      return apiResponse.error(res, result.message, 400, result.error);
     }
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error while saving past visit',
-      error: error.message
-    });
+    return apiResponse.error(res, 'Internal server error while saving past visit', 500, error.message);
   }
 };
 
@@ -112,21 +89,14 @@ const getPrescriptionsByPatientController = async (req, res) => {
     const result = await getPrescriptionsByPatient(doctorId, patientId);
 
     if (result.success) {
-      return res.status(200).json({
-        prescriptions: result.prescriptions,
-        message: result.message
+      return apiResponse.success(res, result.message, { 
+        prescriptions: result.prescriptions 
       });
     } else {
-      return res.status(400).json({
-        message: result.message,
-        error: result.error
-      });
+      return apiResponse.error(res, result.message, 400, result.error);
     }
   } catch (error) {
-    return res.status(500).json({
-      message: 'Internal server error while retrieving prescriptions',
-      error: error.message
-    });
+    return apiResponse.error(res, 'Internal server error while retrieving prescriptions', 500, error.message);
   }
 };
 
@@ -141,21 +111,14 @@ const getDraftPrescriptionController = async (req, res) => {
     const result = await getDraftPrescription(doctorId, patientId);
 
     if (result.success) {
-      return res.status(200).json({
-        prescription: result.prescription,
-        message: result.message
+      return apiResponse.success(res, result.message, { 
+        prescription: result.prescription 
       });
     } else {
-      return res.status(404).json({
-        message: result.message,
-        error: result.error
-      });
+      return apiResponse.error(res, result.message, 404, result.error);
     }
   } catch (error) {
-    return res.status(500).json({
-      message: 'Internal server error while retrieving draft prescription',
-      error: error.message
-    });
+    return apiResponse.error(res, 'Internal server error while retrieving draft prescription', 500, error.message);
   }
 };
 
@@ -170,21 +133,14 @@ const getConsultationHistoryController = async (req, res) => {
     const result = await getConsultationHistory(doctorId, patientId);
 
     if (result.success) {
-      return res.status(200).json({
-        consultations: result.consultations,
-        message: result.message
+      return apiResponse.success(res, result.message, { 
+        consultations: result.consultations 
       });
     } else {
-      return res.status(400).json({
-        message: result.message,
-        error: result.error
-      });
+      return apiResponse.error(res, result.message, 400, result.error);
     }
   } catch (error) {
-    return res.status(500).json({
-      message: 'Internal server error while retrieving consultation history',
-      error: error.message
-    });
+    return apiResponse.error(res, 'Internal server error while retrieving consultation history', 500, error.message);
   }
 };
 

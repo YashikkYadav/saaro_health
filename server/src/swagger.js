@@ -321,6 +321,7 @@ const options = {
         },
         Appointment: {
           type: "object",
+          required: ["doctorId", "patientId", "location", "date", "time", "type"],
           properties: {
             _id: {
               type: "string",
@@ -340,8 +341,8 @@ const options = {
             },
             date: {
               type: "string",
-              format: "date",
-              description: "Appointment date"
+              format: "date-time",
+              description: "Appointment date and time"
             },
             time: {
               type: "string",

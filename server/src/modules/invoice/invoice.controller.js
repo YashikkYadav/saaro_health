@@ -10,6 +10,7 @@ const {
 } = require('./invoice.service');
 const path = require('path');
 const fs = require('fs');
+const apiResponse = require('../../utils/apiResponse.utils');
 
 // Create invoice
 const createInvoice = async (req, res) => {
@@ -17,30 +18,19 @@ const createInvoice = async (req, res) => {
     const { doctorId } = req.params;
     const invoiceData = req.body;
     
-    
     const result = await createInvoiceService(doctorId, invoiceData);
-  
     
     if (result.statusCode >= 400) {
-      // console.log('Invoice creation failed:', result.error);
-      return res.status(result.statusCode).json({
-        success: false,
-        message: result.error
-      });
+      return apiResponse.error(res, result.error, result.statusCode);
     }
     
-    res.status(result.statusCode).json({
-      success: true,
-      message: 'Invoice created successfully',
+    return apiResponse.success(res, 'Invoice created successfully', { 
       invoice: result.invoice,
       invoiceUrl: result.invoiceUrl
-    });
+    }, result.statusCode);
   } catch (error) {
     console.error('Error creating invoice:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -57,23 +47,15 @@ const updateInvoiceByInvoiceId = async (req, res) => {
     const result = await updateInvoiceService(doctorId, invoiceId, cleanUpdateData);
     
     if (result.statusCode >= 400) {
-      return res.status(result.statusCode).json({
-        success: false,
-        message: result.error
-      });
+      return apiResponse.error(res, result.error, result.statusCode);
     }
     
-    res.status(result.statusCode).json({
-      success: true,
-      message: 'Invoice updated successfully',
+    return apiResponse.success(res, 'Invoice updated successfully', { 
       invoice: result.invoice,
       invoiceUrl: result.invoiceUrl
-    });
+    }, result.statusCode);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -85,16 +67,9 @@ const getInvoices = async (req, res) => {
     
     const result = await getInvoicesByDoctorId(doctorId, parseInt(page), parseInt(limit));
     
-    res.status(200).json({
-      success: true,
-      message: 'Invoices retrieved successfully',
-      ...result
-    });
+    return apiResponse.success(res, 'Invoices retrieved successfully', result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -126,17 +101,11 @@ const exportInvoiceData = async (req, res) => {
     });
     
     fileStream.on('error', (err) => {
-      res.status(500).json({
-        success: false,
-        message: 'Error exporting invoices'
-      });
+      return apiResponse.error(res, 'Error exporting invoices', 500);
     });
   } catch (error) {
     console.error('Error exporting invoices:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -163,23 +132,15 @@ const updateInvoiceController = async (req, res) => {
     const result = await updateInvoiceService(doctorId, invoiceId, updateData);
     
     if (result.statusCode >= 400) {
-      return res.status(result.statusCode).json({
-        success: false,
-        message: result.error
-      });
+      return apiResponse.error(res, result.error, result.statusCode);
     }
     
-    res.status(result.statusCode).json({
-      success: true,
-      message: 'Invoice updated successfully',
+    return apiResponse.success(res, 'Invoice updated successfully', { 
       invoice: result.invoice,
       invoiceUrl: result.invoiceUrl
-    });
+    }, result.statusCode);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -190,16 +151,9 @@ const getInvoice = async (req, res) => {
     
     const invoice = await getInvoiceById(doctorId, invoiceId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Invoice retrieved successfully',
-      invoice
-    });
+    return apiResponse.success(res, 'Invoice retrieved successfully', { invoice });
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -210,16 +164,9 @@ const deleteInvoiceController = async (req, res) => {
     
     const deletedInvoice = await deleteInvoice(doctorId, invoiceId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Invoice deleted successfully',
-      invoice: deletedInvoice
-    });
+    return apiResponse.success(res, 'Invoice deleted successfully', { invoice: deletedInvoice });
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -247,16 +194,10 @@ const printInvoiceController = async (req, res) => {
     });
     
     fileStream.on('error', (err) => {
-      res.status(500).json({
-        success: false,
-        message: 'Error generating invoice PDF'
-      });
+      return apiResponse.error(res, 'Error generating invoice PDF', 500);
     });
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 

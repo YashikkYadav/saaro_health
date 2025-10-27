@@ -7,6 +7,7 @@ const {
   updatePatient, 
   deletePatient 
 } = require('./patient.service');
+const apiResponse = require('../../utils/apiResponse.utils');
 
 // Register a new patient
 const register = async (req, res) => {
@@ -14,16 +15,9 @@ const register = async (req, res) => {
     const patientData = req.body;
     const patient = await registerPatient(patientData);
     
-    res.status(201).json({
-      success: true,
-      message: 'Patient registered successfully',
-      patient
-    });
+    return apiResponse.success(res, 'Patient registered successfully', { patient }, 201);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
@@ -33,17 +27,12 @@ const checkExists = async (req, res) => {
     const { phone } = req.body;
     const patient = await checkPatientExists(phone);
     
-    res.status(200).json({
-      success: true,
-      message: 'Patient check completed successfully',
-      exists: !!patient,
-      patient
+    return apiResponse.success(res, 'Patient check completed successfully', { 
+      exists: !!patient, 
+      patient 
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -53,16 +42,9 @@ const getAll = async (req, res) => {
     const { page = 1, limit = 10, searchQuery = '' } = req.body;
     const result = await getAllPatients(parseInt(page), parseInt(limit), searchQuery);
     
-    res.status(200).json({
-      success: true,
-      message: 'Patients retrieved successfully',
-      ...result
-    });
+    return apiResponse.success(res, 'Patients retrieved successfully', result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -72,16 +54,9 @@ const getPatient = async (req, res) => {
     const { patientId } = req.params;
     const patient = await getPatientById(patientId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Patient retrieved successfully',
-      patient
-    });
+    return apiResponse.success(res, 'Patient retrieved successfully', { patient });
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -91,16 +66,9 @@ const getPatientByUidController = async (req, res) => {
     const { uid } = req.params;
     const patient = await getPatientByUid(uid);
     
-    res.status(200).json({
-      success: true,
-      message: 'Patient retrieved successfully',
-      patient
-    });
+    return apiResponse.success(res, 'Patient retrieved successfully', { patient });
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 
@@ -111,16 +79,9 @@ const update = async (req, res) => {
     const updateData = req.body;
     const updatedPatient = await updatePatient(patientId, updateData);
     
-    res.status(200).json({
-      success: true,
-      message: 'Patient updated successfully',
-      patient: updatedPatient
-    });
+    return apiResponse.success(res, 'Patient updated successfully', { patient: updatedPatient });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 400);
   }
 };
 
@@ -130,15 +91,9 @@ const deletePatientController = async (req, res) => {
     const { patientId } = req.params;
     await deletePatient(patientId);
     
-    res.status(200).json({
-      success: true,
-      message: 'Patient deleted successfully'
-    });
+    return apiResponse.success(res, 'Patient deleted successfully');
   } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
+    return apiResponse.error(res, error.message, 404);
   }
 };
 

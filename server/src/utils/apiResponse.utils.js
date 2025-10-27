@@ -16,4 +16,4 @@ const apiResponse = {
   }
 };
 
-export default apiResponse;
+module.exports = apiResponse;
