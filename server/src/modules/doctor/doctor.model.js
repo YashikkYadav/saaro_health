@@ -21,6 +21,33 @@ const treatmentSchema = new mongoose.Schema({
 });
 // const treatmentSchema = new mongoose.Schema({ ... });
 
+// OPD Location sub-schema
+const opdLocationSchema = new mongoose.Schema({
+  clinicName: { type: String, default: '' },
+  city: { type: String, default: '' },
+  address: { type: String, default: '' },
+  days: {
+    Mon: { type: Boolean, default: false },
+    Tue: { type: Boolean, default: false },
+    Wed: { type: Boolean, default: false },
+    Thu: { type: Boolean, default: false },
+    Fri: { type: Boolean, default: false },
+    Sat: { type: Boolean, default: false },
+    Sun: { type: Boolean, default: false }
+  },
+  startTime: { type: String, default: '09:00' },
+  endTime: { type: String, default: '17:00' },
+  slotMins: { type: Number, default: 10 },
+  active: { type: Boolean, default: true },
+  mapLocation: {
+    type: {
+      lat: { type: Number },
+      lng: { type: Number }
+    },
+    default: null
+  }
+});
+
 const doctorSchema = new mongoose.Schema(
   {
     // Basic doctor information
@@ -59,6 +86,8 @@ const doctorSchema = new mongoose.Schema(
     specialization: { type: String },
     surgeries: [{ type: String }],
 
+    // OPD Locations
+    opdLocations: { type: [opdLocationSchema], default: [] },
 
     // Location (latitude & longitude)
     locations: [

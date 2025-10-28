@@ -6,15 +6,23 @@ const {
   getInvoice12MonthsReportService,
   getPayment12MonthsReportService,
   getComparisonDataService,
+  getTodayAppointmentsPaginatedService,
   getPlannedSurgeriesPaginatedService,
   dashboardKPIsService
 } = require('./dashboard.service');
 const apiResponse = require('../../utils/apiResponse.utils');
+const mongoose = require('mongoose');
 
 // Get patient 24 hour report
 const getPatient24HourReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const result = await getPatient24HourReportService(doctorId);
     return apiResponse.success(res, '24 hour patient report retrieved successfully', { result });
   } catch (error) {
@@ -26,6 +34,12 @@ const getPatient24HourReport = async (req, res) => {
 const getPatient30DaysReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const result = await getPatient30DaysReportService(doctorId);
     return apiResponse.success(res, '30 days patient report retrieved successfully', { result });
   } catch (error) {
@@ -37,6 +51,12 @@ const getPatient30DaysReport = async (req, res) => {
 const getPatient12MonthsReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const result = await getPatient12MonthsReportService(doctorId);
     return apiResponse.success(res, '12 months patient report retrieved successfully', { result });
   } catch (error) {
@@ -48,6 +68,12 @@ const getPatient12MonthsReport = async (req, res) => {
 const getAppointmentTypeReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const result = await getAppointmentTypeReportService(doctorId);
     return apiResponse.success(res, 'Appointment type report retrieved successfully', { result });
   } catch (error) {
@@ -59,6 +85,12 @@ const getAppointmentTypeReport = async (req, res) => {
 const getInvoice12MonthsReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const result = await getInvoice12MonthsReportService(doctorId);
     return apiResponse.success(res, '12 months invoice report retrieved successfully', { result });
   } catch (error) {
@@ -70,6 +102,12 @@ const getInvoice12MonthsReport = async (req, res) => {
 const getPayment12MonthsReport = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const result = await getPayment12MonthsReportService(doctorId);
     return apiResponse.success(res, '12 months payment report retrieved successfully', { result });
   } catch (error) {
@@ -81,6 +119,12 @@ const getPayment12MonthsReport = async (req, res) => {
 const getComparisonData = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const result = await getComparisonDataService(doctorId);
     return apiResponse.success(res, 'Comparison data retrieved successfully', { result });
   } catch (error) {
@@ -92,6 +136,12 @@ const getComparisonData = async (req, res) => {
 const getTodayAppointmentsPaginated = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const { page = 1, limit = 10 } = req.query;
     const result = await getTodayAppointmentsPaginatedService(doctorId, parseInt(page), parseInt(limit));
     return apiResponse.success(res, 'Today appointments retrieved successfully', { result });
@@ -104,6 +154,12 @@ const getTodayAppointmentsPaginated = async (req, res) => {
 const getPlannedSurgeriesPaginated = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const { page = 1, limit = 10 } = req.query;
     const result = await getPlannedSurgeriesPaginatedService(doctorId, parseInt(page), parseInt(limit));
     return apiResponse.success(res, 'Planned surgeries retrieved successfully', { result });
@@ -116,6 +172,12 @@ const getPlannedSurgeriesPaginated = async (req, res) => {
 const dashboardKPIs = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    
+    // Validate doctorId
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      return apiResponse.error(res, 'Invalid doctor ID', 400);
+    }
+    
     const result = await dashboardKPIsService(doctorId);
     return apiResponse.success(res, 'Dashboard KPIs retrieved successfully', { result });
   } catch (error) {

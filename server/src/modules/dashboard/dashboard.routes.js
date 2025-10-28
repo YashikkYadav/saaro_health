@@ -568,7 +568,7 @@ router.get('/:doctorId/planned-surgeries', getPlannedSurgeriesPaginated);
 
 /**
  * @swagger
- * /api/dashboard/kpis/{doctorId}:
+ * /api/dashboard/{doctorId}/kpis:
  *   get:
  *     summary: Get dashboard KPIs
  *     tags: [Dashboard]
@@ -619,7 +619,7 @@ router.get('/:doctorId/planned-surgeries', getPlannedSurgeriesPaginated);
  *                   type: string
  */
 
-// GET /kpis/:doctorId - Get dashboard KPIs
-router.get('/kpis/:doctorId', dashboardKPIs);
+// GET /:doctorId/kpis - Get dashboard KPIs
+router.get('/:doctorId/kpis', dashboardKPIs);
 
 module.exports = router;

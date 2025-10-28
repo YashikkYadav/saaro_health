@@ -50,13 +50,24 @@ const registerDoctor = async (doctorData) => {
 // Login doctor
 const loginDoctor = async (identifier, password) => {
   try {
-    // Find doctor by email or phone number
+    // Find doctor by email or phone number and populate appointments and patients
     const doctor = await Doctor.findOne({
       $or: [
         { email: identifier },
         { phoneNumber: identifier }
       ]
-    });
+    }).populate([
+      {
+        path: 'appointments',
+        model: 'Appointment',
+        options: { sort: { date: 1, time: 1 } }
+      },
+      {
+        path: 'patients',
+        model: 'Patient',
+        options: { sort: { fullName: 1 } }
+      }
+    ]);
 
     if (!doctor) {
       throw new Error('Doctor not found');
@@ -170,6 +181,12 @@ const updateProfile = async (doctorId, updateData) => {
       delete updateData.password;
     }
 
+    // Handle avatar field specifically
+    // If avatar is not provided or is empty, don't update it
+    if (updateData.avatar === undefined || updateData.avatar === null || updateData.avatar === '') {
+      delete updateData.avatar;
+    }
+
     const updatedDoctor = await Doctor.findByIdAndUpdate(
       doctorId,
       updateData,
@@ -245,6 +262,29 @@ const getAvailableDates = async (doctorId) => {
   }
 };
 
+// Upload avatar
+const uploadAvatar = async (doctorId, filePath) => {
+  try {
+    const updatedDoctor = await Doctor.findByIdAndUpdate(
+      doctorId,
+      { avatar: filePath },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedDoctor) {
+      throw new Error('Doctor not found');
+    }
+
+    // Remove password from response
+    const doctorResponse = updatedDoctor.toObject();
+    delete doctorResponse.password;
+
+    return doctorResponse;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 module.exports = {
   registerDoctor,
   loginDoctor,
@@ -256,5 +296,6 @@ module.exports = {
   deleteDoctor,
   getAllDoctors,
   getDoctorsByCityOrSpecialty,
-  getAvailableDates
+  getAvailableDates,
+  uploadAvatar
 };

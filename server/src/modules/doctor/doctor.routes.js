@@ -10,8 +10,12 @@ const {
   deleteDoctorController, 
   getDoctors,
   getDoctorsByCityOrSpecialtyController,
-  getAvailableDatesController
+  getAvailableDatesController,
+  uploadAvatarController
 } = require('./doctor.controller');
+
+// Import multer config
+const { upload, processImage } = require('./multer.config');
 
 const router = express.Router();
 
@@ -408,6 +412,51 @@ router.put('/:doctorId/change-password', changePasswordController);
  *                 type: array
  *                 items:
  *                   type: string
+ *               opdLocations:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     clinicName:
+ *                       type: string
+ *                     city:
+ *                       type: string
+ *                     address:
+ *                       type: string
+ *                     days:
+ *                       type: object
+ *                       properties:
+ *                         Mon:
+ *                           type: boolean
+ *                         Tue:
+ *                           type: boolean
+ *                         Wed:
+ *                           type: boolean
+ *                         Thu:
+ *                           type: boolean
+ *                         Fri:
+ *                           type: boolean
+ *                         Sat:
+ *                           type: boolean
+ *                         Sun:
+ *                           type: boolean
+ *                     startTime:
+ *                       type: string
+ *                       format: time
+ *                     endTime:
+ *                       type: string
+ *                       format: time
+ *                     slotMins:
+ *                       type: number
+ *                     active:
+ *                       type: boolean
+ *                     mapLocation:
+ *                       type: object
+ *                       properties:
+ *                         lat:
+ *                           type: number
+ *                         lng:
+ *                           type: number
  *     responses:
  *       200:
  *         description: Profile updated successfully
@@ -436,7 +485,12 @@ router.put('/:doctorId/change-password', changePasswordController);
  */
 
 // PUT /:doctorId/profile - Update profile
-router.put('/:doctorId/profile', updateProfileController);
+// Support both JSON and multipart/form-data for avatar upload
+router.put('/:doctorId/profile', 
+  upload.single('avatar'), 
+  processImage, 
+  updateProfileController
+);
 
 /**
  * @swagger
@@ -672,5 +726,93 @@ router.post('/search', getDoctorsByCityOrSpecialtyController);
 
 // POST /available-dates - Get available dates for a doctor
 router.post('/available-dates', getAvailableDatesController);
+
+/**
+ * @swagger
+ * /api/doctors/avatar:
+ *   post:
+ *     summary: Upload doctor avatar
+ *     tags: [Doctors]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Avatar uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 avatarUrl:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
+
+// POST /avatar - Upload doctor avatar
+router.post('/avatar', upload.single('avatar'), processImage, uploadAvatarController);
+
+/**
+ * @swagger
+ * /api/doctors/{doctorId}:
+ *   delete:
+ *     summary: Delete a doctor
+ *     tags: [Doctors]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: doctorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor ID
+ *     responses:
+ *       200:
+ *         description: Doctor deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Doctor not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ */
 
 module.exports = router;

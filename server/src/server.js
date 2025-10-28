@@ -6,6 +6,7 @@ const routes = require("./routes");
 const { errorHandler } = require("./middlewares/error.middleware");
 const { swaggerDocs } = require("./swagger");
 const requestLogger = require("./middlewares/requestLogger.middleware");
+const path = require('path');
 
 dotenv.config();
 const app = express();
@@ -15,6 +16,9 @@ app.use(requestLogger);
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // API Routes
 app.use("/api", routes);

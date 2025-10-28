@@ -9,9 +9,11 @@ const {
   deleteDoctor, 
   getAllDoctors,
   getDoctorsByCityOrSpecialty,
-  getAvailableDates
+  getAvailableDates,
+  uploadAvatar
 } = require('./doctor.service');
 const apiResponse = require('../../utils/apiResponse.utils');
+const fs = require('fs');
 
 // Register a new doctor
 const register = async (req, res) => {
@@ -76,6 +78,18 @@ const getDoctor = async (req, res) => {
     return apiResponse.error(res, error.message, 404);
   }
 };
+// Get doctor profile by ID
+const getDoctorProfile = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const doctor = await getDoctorById(doctorId);
+    
+    return apiResponse.success(res, 'Doctor retrieved successfully', { doctor });
+  } catch (error) {
+    return apiResponse.error(res, error.message, 404);
+  }
+};
+
 
 // Change password
 const changePasswordController = async (req, res) => {
@@ -94,12 +108,79 @@ const changePasswordController = async (req, res) => {
 const updateProfileController = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    const updateData = req.body;
+    let updateData = req.body;
+    
+    // If there's an uploaded file, process it
+    if (req.file) {
+      // Check if file size is within limit after compression
+      if (req.file.size > 100 * 1024) { // 100KB
+        // Clean up the uploaded file
+        fs.unlinkSync(req.file.path);
+        return apiResponse.error(res, 'File is too large even after compression. Please use a smaller image.', 400);
+      }
+      
+      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+      updateData.avatar = avatarUrl;
+    }
+    
     const updatedDoctor = await updateProfile(doctorId, updateData);
     
     return apiResponse.success(res, 'Profile updated successfully', { doctor: updatedDoctor });
   } catch (error) {
+    // Clean up the uploaded file if there was an error
+    if (req.file && req.file.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        console.error('Error cleaning up file:', unlinkError);
+      }
+    }
     return apiResponse.error(res, error.message, 400);
+  }
+};
+
+// Upload avatar
+const uploadAvatarController = async (req, res) => {
+  try {
+    if (!req.file) {
+      return apiResponse.error(res, 'No file uploaded', 400);
+    }
+
+    // Check if file size is within limit after compression
+    if (req.file.size > 100 * 1024) { // 100KB
+      // Clean up the uploaded file
+      fs.unlinkSync(req.file.path);
+      return apiResponse.error(res, 'File is too large even after compression. Please use a smaller image.', 400);
+    }
+
+    // Get doctor ID from the authenticated user
+    const doctorId = req.doctor?.id || req.user?.id;
+    
+    if (!doctorId) {
+      // Clean up the uploaded file
+      fs.unlinkSync(req.file.path);
+      return apiResponse.error(res, 'Doctor ID not found in request', 400);
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    
+    // Update doctor's avatar in the database
+    const updatedDoctor = await uploadAvatar(doctorId, avatarUrl);
+    
+    return apiResponse.success(res, 'Avatar uploaded successfully', { 
+      avatarUrl,
+      doctor: updatedDoctor
+    });
+  } catch (error) {
+    // Clean up the uploaded file if there was an error
+    if (req.file && req.file.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        console.error('Error cleaning up file:', unlinkError);
+      }
+    }
+    return apiResponse.error(res, error.message, 500);
   }
 };
 
@@ -166,5 +247,6 @@ module.exports = {
   deleteDoctorController,
   getDoctors,
   getDoctorsByCityOrSpecialtyController,
-  getAvailableDatesController
+  getAvailableDatesController,
+  uploadAvatarController
 };

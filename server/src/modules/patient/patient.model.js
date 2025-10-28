@@ -110,6 +110,13 @@ const patientSchema = new mongoose.Schema(
         ref: "Message",
       },
     ],
+    // Adding reference to reviews
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
   },
   {
     timestamps: true,

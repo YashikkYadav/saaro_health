@@ -138,6 +138,75 @@ const options = {
               },
               description: "Doctor's surgeries"
             },
+            opdLocations: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  clinicName: {
+                    type: "string"
+                  },
+                  city: {
+                    type: "string"
+                  },
+                  address: {
+                    type: "string"
+                  },
+                  days: {
+                    type: "object",
+                    properties: {
+                      Mon: {
+                        type: "boolean"
+                      },
+                      Tue: {
+                        type: "boolean"
+                      },
+                      Wed: {
+                        type: "boolean"
+                      },
+                      Thu: {
+                        type: "boolean"
+                      },
+                      Fri: {
+                        type: "boolean"
+                      },
+                      Sat: {
+                        type: "boolean"
+                      },
+                      Sun: {
+                        type: "boolean"
+                      }
+                    }
+                  },
+                  startTime: {
+                    type: "string",
+                    format: "time"
+                  },
+                  endTime: {
+                    type: "string",
+                    format: "time"
+                  },
+                  slotMins: {
+                    type: "number"
+                  },
+                  active: {
+                    type: "boolean"
+                  },
+                  mapLocation: {
+                    type: "object",
+                    properties: {
+                      lat: {
+                        type: "number"
+                      },
+                      lng: {
+                        type: "number"
+                      }
+                    }
+                  }
+                }
+              },
+              description: "Doctor's OPD locations"
+            },
             patients: {
               type: "array",
               items: {
@@ -718,6 +787,44 @@ const options = {
             }
           }
         },
+        Review: {
+          type: "object",
+          required: ["text", "rating", "doctorId", "patientId"],
+          properties: {
+            _id: {
+              type: "string",
+              description: "Review ID"
+            },
+            text: {
+              type: "string",
+              description: "Review text"
+            },
+            rating: {
+              type: "number",
+              description: "Rating out of 5",
+              minimum: 1,
+              maximum: 5
+            },
+            doctorId: {
+              type: "string",
+              description: "Doctor ID"
+            },
+            patientId: {
+              type: "string",
+              description: "Patient ID"
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Creation timestamp"
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Update timestamp"
+            }
+          }
+        }
       }
     },
     security: [{ bearerAuth: [] }]

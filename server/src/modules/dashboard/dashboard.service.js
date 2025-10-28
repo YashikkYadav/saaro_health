@@ -10,7 +10,7 @@ const getPatient24HourReportService = async (doctorId) => {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     
     const newPatients = await Patient.countDocuments({
-      doctorId,
+      doctors: { $in: [doctorId] },
       createdAt: { $gte: twentyFourHoursAgo }
     });
     
@@ -32,7 +32,7 @@ const getPatient30DaysReportService = async (doctorId) => {
     const patientData = await Patient.aggregate([
       {
         $match: {
-          doctorId: doctorId,
+          doctors: { $in: [doctorId] },
           createdAt: { $gte: thirtyDaysAgo }
         }
       },
@@ -68,7 +68,7 @@ const getPatient12MonthsReportService = async (doctorId) => {
     const patientData = await Patient.aggregate([
       {
         $match: {
-          doctorId: doctorId,
+          doctors: { $in: [doctorId] },
           createdAt: { $gte: twelveMonthsAgo }
         }
       },
@@ -100,7 +100,7 @@ const getAppointmentTypeReportService = async (doctorId) => {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
     
-    // Get appointment count by type for the last 12 months
+    // Get appointment count by type
     const appointmentData = await Appointment.aggregate([
       {
         $match: {
@@ -134,7 +134,7 @@ const getInvoice12MonthsReportService = async (doctorId) => {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
     
-    // Get invoice data by month for the last 12 months
+    // Get invoice count for each month
     const invoiceData = await Invoice.aggregate([
       {
         $match: {
@@ -171,7 +171,7 @@ const getPayment12MonthsReportService = async (doctorId) => {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
     
-    // Get payment data by mode for the last 12 months
+    // Get payment count by mode for each month
     const paymentData = await Invoice.aggregate([
       {
         $match: {
@@ -181,13 +181,16 @@ const getPayment12MonthsReportService = async (doctorId) => {
       },
       {
         $group: {
-          _id: "$paymentMode",
+          _id: {
+            month: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+            mode: "$paymentMode"
+          },
           count: { $sum: 1 },
           totalAmount: { $sum: "$totalAmount" }
         }
       },
       {
-        $sort: { totalAmount: -1 }
+        $sort: { "_id.month": 1, "_id.mode": 1 }
       }
     ]);
     
@@ -223,7 +226,7 @@ const getComparisonDataService = async (doctorId) => {
     
     // Current month counts
     const currentMonthPatients = await Patient.countDocuments({
-      doctorId,
+      doctors: { $in: [doctorId] },
       createdAt: { $gte: startOfMonth, $lte: endOfMonth }
     });
     
@@ -254,7 +257,7 @@ const getComparisonDataService = async (doctorId) => {
     
     // Previous month counts
     const previousMonthPatients = await Patient.countDocuments({
-      doctorId,
+      doctors: { $in: [doctorId] },
       createdAt: { $gte: startOfPreviousMonth, $lte: endOfPreviousMonth }
     });
     
@@ -351,16 +354,16 @@ const getPlannedSurgeriesPaginatedService = async (doctorId, page = 1, limit = 1
       Appointment.find({
         doctorId,
         type: 'Surgery',
-        status: 'Planned'
+        markComplete: false
       })
       .populate('patientId', 'fullName')
-      .sort({ date: 1 })
+      .sort({ date: 1, time: 1 })
       .skip(skip)
       .limit(limit),
       Appointment.countDocuments({
         doctorId,
         type: 'Surgery',
-        status: 'Planned'
+        markComplete: false
       })
     ]);
     
@@ -377,7 +380,6 @@ const getPlannedSurgeriesPaginatedService = async (doctorId, page = 1, limit = 1
   }
 };
 
-// Get dashboard KPIs service
 const dashboardKPIsService = async (doctorId) => {
   try {
     // Get today's date range
@@ -387,8 +389,10 @@ const dashboardKPIsService = async (doctorId) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
     
-    // Get total patients
-    const totalPatients = await Patient.countDocuments({ doctorId });
+    // Get total patients - using the doctors array in patient schema
+    const totalPatients = await Patient.countDocuments({ 
+      doctors: { $in: [doctorId] } 
+    });
     
     // Get today's appointments
     const todayAppointments = await Appointment.countDocuments({
@@ -402,22 +406,28 @@ const dashboardKPIsService = async (doctorId) => {
     // Get total invoices
     const totalInvoices = await Invoice.countDocuments({ doctorId });
     
-    // Get total revenue
+    // Get total revenue - sum all invoice amounts, including 0 values
+    // Convert doctorId to ObjectId if it's a string
+    const mongoose = require('mongoose');
+    const objectId = mongoose.Types.ObjectId.isValid(doctorId) ? new mongoose.Types.ObjectId(doctorId) : doctorId;
+    
     const revenueResult = await Invoice.aggregate([
       {
         $match: {
-          doctorId: doctorId
+          doctorId: objectId
         }
       },
       {
         $group: {
           _id: null,
-          total: { $sum: "$totalAmount" }
+          totalAmount: { $sum: { $ifNull: ["$totalAmount", 0] } },
+          count: { $sum: 1 }
         }
       }
     ]);
+
     
-    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
+    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalAmount : 0;
     
     return {
       totalPatients,
@@ -427,6 +437,7 @@ const dashboardKPIsService = async (doctorId) => {
       totalRevenue
     };
   } catch (error) {
+    console.error('Error in dashboardKPIsService:', error);
     throw new Error(error.message);
   }
 };
