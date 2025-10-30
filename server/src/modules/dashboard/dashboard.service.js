@@ -3,6 +3,7 @@ const Appointment = require('../appointment/appointment.model');
 const Invoice = require('../invoice/invoice.model');
 const Doctor = require('../doctor/doctor.model');
 const moment = require('moment');
+const mongoose = require('mongoose');
 
 // Get patient 24 hour report service
 const getPatient24HourReportService = async (doctorId) => {
@@ -206,6 +207,11 @@ const getPayment12MonthsReportService = async (doctorId) => {
 // Get comparison data service
 const getComparisonDataService = async (doctorId) => {
   try {
+    // Convert doctorId to ObjectId if it's a string
+    const doctorObjectId = mongoose.Types.ObjectId.isValid(doctorId) 
+      ? new mongoose.Types.ObjectId(doctorId) 
+      : doctorId;
+    
     // Get current month data
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
@@ -226,24 +232,24 @@ const getComparisonDataService = async (doctorId) => {
     
     // Current month counts
     const currentMonthPatients = await Patient.countDocuments({
-      doctors: { $in: [doctorId] },
+      doctors: { $in: [doctorObjectId] },
       createdAt: { $gte: startOfMonth, $lte: endOfMonth }
     });
     
     const currentMonthAppointments = await Appointment.countDocuments({
-      doctorId,
+      doctorId: doctorObjectId,
       createdAt: { $gte: startOfMonth, $lte: endOfMonth }
     });
     
     const currentMonthInvoices = await Invoice.countDocuments({
-      doctorId,
+      doctorId: doctorObjectId,
       createdAt: { $gte: startOfMonth, $lte: endOfMonth }
     });
     
     const currentMonthRevenue = await Invoice.aggregate([
       {
         $match: {
-          doctorId: doctorId,
+          doctorId: doctorObjectId,
           createdAt: { $gte: startOfMonth, $lte: endOfMonth }
         }
       },
@@ -257,24 +263,24 @@ const getComparisonDataService = async (doctorId) => {
     
     // Previous month counts
     const previousMonthPatients = await Patient.countDocuments({
-      doctors: { $in: [doctorId] },
+      doctors: { $in: [doctorObjectId] },
       createdAt: { $gte: startOfPreviousMonth, $lte: endOfPreviousMonth }
     });
     
     const previousMonthAppointments = await Appointment.countDocuments({
-      doctorId,
+      doctorId: doctorObjectId,
       createdAt: { $gte: startOfPreviousMonth, $lte: endOfPreviousMonth }
     });
     
     const previousMonthInvoices = await Invoice.countDocuments({
-      doctorId,
+      doctorId: doctorObjectId,
       createdAt: { $gte: startOfPreviousMonth, $lte: endOfPreviousMonth }
     });
     
     const previousMonthRevenue = await Invoice.aggregate([
       {
         $match: {
-          doctorId: doctorId,
+          doctorId: doctorObjectId,
           createdAt: { $gte: startOfPreviousMonth, $lte: endOfPreviousMonth }
         }
       },
@@ -382,6 +388,11 @@ const getPlannedSurgeriesPaginatedService = async (doctorId, page = 1, limit = 1
 
 const dashboardKPIsService = async (doctorId) => {
   try {
+    // Convert doctorId to ObjectId if it's a string
+    const doctorObjectId = mongoose.Types.ObjectId.isValid(doctorId) 
+      ? new mongoose.Types.ObjectId(doctorId) 
+      : doctorId;
+    
     // Get today's date range
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -391,41 +402,41 @@ const dashboardKPIsService = async (doctorId) => {
     
     // Get total patients - using the doctors array in patient schema
     const totalPatients = await Patient.countDocuments({ 
-      doctors: { $in: [doctorId] } 
+      doctors: { $in: [doctorObjectId] } 
     });
     
     // Get today's appointments
     const todayAppointments = await Appointment.countDocuments({
-      doctorId,
+      doctorId: doctorObjectId,
       date: { $gte: startOfDay, $lte: endOfDay }
     });
     
-    // Get total appointments
-    const totalAppointments = await Appointment.countDocuments({ doctorId });
+    // Get total appointments - only count valid appointments
+    const totalAppointments = await Appointment.countDocuments({ 
+      doctorId: doctorObjectId,
+      date: { $exists: true },
+      time: { $exists: true },
+      patientId: { $exists: true }
+    });
     
     // Get total invoices
-    const totalInvoices = await Invoice.countDocuments({ doctorId });
+    const totalInvoices = await Invoice.countDocuments({ doctorId: doctorObjectId });
     
-    // Get total revenue - sum all invoice amounts, including 0 values
-    // Convert doctorId to ObjectId if it's a string
-    const mongoose = require('mongoose');
-    const objectId = mongoose.Types.ObjectId.isValid(doctorId) ? new mongoose.Types.ObjectId(doctorId) : doctorId;
-    
+    // Get total revenue
     const revenueResult = await Invoice.aggregate([
       {
         $match: {
-          doctorId: objectId
+          doctorId: doctorObjectId,
+          totalAmount: { $gt: 0 }  // Only include invoices with positive totalAmount
         }
       },
       {
         $group: {
           _id: null,
-          totalAmount: { $sum: { $ifNull: ["$totalAmount", 0] } },
-          count: { $sum: 1 }
+          totalAmount: { $sum: "$totalAmount" }
         }
       }
     ]);
-
     
     const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalAmount : 0;
     
@@ -437,7 +448,6 @@ const dashboardKPIsService = async (doctorId) => {
       totalRevenue
     };
   } catch (error) {
-    console.error('Error in dashboardKPIsService:', error);
     throw new Error(error.message);
   }
 };

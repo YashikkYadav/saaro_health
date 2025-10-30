@@ -191,7 +191,18 @@ const updateProfile = async (doctorId, updateData) => {
       doctorId,
       updateData,
       { new: true, runValidators: true }
-    );
+    ).populate([
+      {
+        path: 'appointments',
+        model: 'Appointment',
+        options: { sort: { date: 1, time: 1 } }
+      },
+      {
+        path: 'patients',
+        model: 'Patient',
+        options: { sort: { fullName: 1 } }
+      }
+    ]);
 
     if (!updatedDoctor) {
       throw new Error('Doctor not found');
