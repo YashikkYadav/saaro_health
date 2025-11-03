@@ -65,7 +65,7 @@ const loginDoctor = async (identifier, password) => {
       {
         path: 'patients',
         model: 'Patient',
-        options: { sort: { fullName: 1 } }
+        options: { sort: { fullName: 1 }, limit: 0 } // Remove limit to get all patients
       }
     ]);
 
@@ -129,7 +129,18 @@ const getFirstDoctor = async () => {
 // Get doctor by ID
 const getDoctorById = async (doctorId) => {
   try {
-    const doctor = await Doctor.findById(doctorId);
+    const doctor = await Doctor.findById(doctorId).populate([
+      {
+        path: 'appointments',
+        model: 'Appointment',
+        options: { sort: { date: 1, time: 1 } }
+      },
+      {
+        path: 'patients',
+        model: 'Patient',
+        options: { sort: { fullName: 1 }, limit: 0 } // Remove limit to get all patients
+      }
+    ]);
     
     if (!doctor) {
       throw new Error('Doctor not found');
@@ -200,7 +211,7 @@ const updateProfile = async (doctorId, updateData) => {
       {
         path: 'patients',
         model: 'Patient',
-        options: { sort: { fullName: 1 } }
+        options: { sort: { fullName: 1 }, limit: 0 } // Remove limit to get all patients
       }
     ]);
 
@@ -280,7 +291,18 @@ const uploadAvatar = async (doctorId, filePath) => {
       doctorId,
       { avatar: filePath },
       { new: true, runValidators: true }
-    );
+    ).populate([
+      {
+        path: 'appointments',
+        model: 'Appointment',
+        options: { sort: { date: 1, time: 1 } }
+      },
+      {
+        path: 'patients',
+        model: 'Patient',
+        options: { sort: { fullName: 1 }, limit: 0 } // Remove limit to get all patients
+      }
+    ]);
 
     if (!updatedDoctor) {
       throw new Error('Doctor not found');

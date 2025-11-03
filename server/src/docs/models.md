@@ -74,6 +74,7 @@ This document provides detailed information about all the Mongoose models used i
 | referredBy | String | No | - | null | - |
 | otp | Number | No | - | null | - |
 | category | String | No | - | 'Follow-up' | - |
+| status | String | No | - | 'Waiting' | Enum: ['Waiting', 'In Consultation', 'Completed'] |
 | doctors | Array | No | Doctor | - | Array of ObjectIds |
 | appointments | Array | No | Appointment | - | Array of ObjectIds |
 | prescriptions | Array | No | Prescription | - | Array of ObjectIds |

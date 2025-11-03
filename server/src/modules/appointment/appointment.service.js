@@ -5,13 +5,29 @@ const Patient = require('../patient/patient.model');
 // Create a new appointment (existing function, but let's make sure it's correct)
 const createAppointment = async (appointmentData) => {
   try {
-    const { doctorId, patientId, ...appointmentInfo } = appointmentData;
+    const { doctorId, patientId, date, time, location, type, status, source, ...otherInfo } = appointmentData;
     
-    // Create new appointment
+    // Get patient details to embed in the appointment
+    const patient = await Patient.findById(patientId).select('fullName phoneNumber');
+    
+    if (!patient) {
+      throw new Error('Patient not found');
+    }
+    
+    // Create new appointment with embedded patient data for consistency
     const newAppointment = new Appointment({
       doctorId,
       patientId,
-      ...appointmentInfo
+      date: new Date(date),
+      time,
+      location,
+      type,
+      status: status || 'Pending',
+      source: source || 'manual',
+      // Embed patient data for consistent structure
+      name: patient.fullName,
+      phoneNumber: patient.phoneNumber,
+      ...otherInfo
     });
     
     const savedAppointment = await newAppointment.save();
@@ -28,7 +44,12 @@ const createAppointment = async (appointmentData) => {
       { $addToSet: { appointments: savedAppointment._id } }
     );
     
-    return savedAppointment;
+    // Populate the saved appointment with doctor and patient details
+    const populatedAppointment = await Appointment.findById(savedAppointment._id)
+      .populate('doctorId', 'name')
+      .populate('patientId', 'fullName phoneNumber');
+    
+    return populatedAppointment;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -37,18 +58,28 @@ const createAppointment = async (appointmentData) => {
 // Book an appointment for a doctor
 const bookAppointmentService = async (appointmentData) => {
   try {
-    const { doctorId, patientId, date, timeSlot, location, notes, fees, ...otherInfo } = appointmentData;
+    const { doctorId, patientId, date, time, location, type, ...otherInfo } = appointmentData;
     
-    // Create new appointment with default status "confirmed"
+    // Get patient details to embed in the appointment
+    const patient = await Patient.findById(patientId).select('fullName phoneNumber');
+    
+    if (!patient) {
+      throw new Error('Patient not found');
+    }
+    
+    // Create new appointment with embedded patient data for consistency
     const newAppointment = new Appointment({
       doctorId,
       patientId,
       date: new Date(date),
-      time: timeSlot,
+      time,
       location,
-      notes,
-      fees,
+      type,
       status: 'confirmed',
+      source: 'manual',
+      // Embed patient data for consistent structure
+      name: patient.fullName,
+      phoneNumber: patient.phoneNumber,
       ...otherInfo
     });
     
@@ -66,7 +97,12 @@ const bookAppointmentService = async (appointmentData) => {
       { $addToSet: { appointments: savedAppointment._id } }
     );
     
-    return savedAppointment;
+    // Populate the saved appointment with doctor and patient details
+    const populatedAppointment = await Appointment.findById(savedAppointment._id)
+      .populate('doctorId', 'name')
+      .populate('patientId', 'fullName phoneNumber');
+    
+    return populatedAppointment;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -75,18 +111,28 @@ const bookAppointmentService = async (appointmentData) => {
 // Create an appointment for a doctor (admin/doctor)
 const createAppointmentForDoctorService = async (appointmentData) => {
   try {
-    const { doctorId, patientId, date, timeSlot, location, notes, fees, status, ...otherInfo } = appointmentData;
+    const { doctorId, patientId, date, time, location, type, status, source, ...otherInfo } = appointmentData;
     
-    // Create new appointment
+    // Get patient details to embed in the appointment
+    const patient = await Patient.findById(patientId).select('fullName phoneNumber');
+    
+    if (!patient) {
+      throw new Error('Patient not found');
+    }
+    
+    // Create new appointment with embedded patient data for consistency
     const newAppointment = new Appointment({
       doctorId,
       patientId,
       date: new Date(date),
-      time: timeSlot,
+      time,
       location,
-      notes,
-      fees,
+      type,
       status: status || 'Pending',
+      source: source || 'manual',
+      // Embed patient data for consistent structure
+      name: patient.fullName,
+      phoneNumber: patient.phoneNumber,
       ...otherInfo
     });
     
@@ -104,7 +150,12 @@ const createAppointmentForDoctorService = async (appointmentData) => {
       { $addToSet: { appointments: savedAppointment._id } }
     );
     
-    return savedAppointment;
+    // Populate the saved appointment with doctor and patient details
+    const populatedAppointment = await Appointment.findById(savedAppointment._id)
+      .populate('doctorId', 'name')
+      .populate('patientId', 'fullName phoneNumber');
+    
+    return populatedAppointment;
   } catch (error) {
     throw new Error(error.message);
   }
@@ -279,6 +330,28 @@ const updateAppointmentStatusByIdService = async (appointmentId, status) => {
 // Update appointment (existing function)
 const updateAppointment = async (appointmentId, updateData) => {
   try {
+    // First, get the current appointment to check if patientId is being changed
+    const currentAppointment = await Appointment.findById(appointmentId);
+    
+    if (!currentAppointment) {
+      throw new Error('Appointment not found');
+    }
+    
+    // If patientId is being updated, we need to update both patient documents
+    if (updateData.patientId && updateData.patientId !== currentAppointment.patientId.toString()) {
+      // Remove appointment from old patient's appointments array
+      await Patient.findByIdAndUpdate(
+        currentAppointment.patientId,
+        { $pull: { appointments: appointmentId } }
+      );
+      
+      // Add appointment to new patient's appointments array
+      await Patient.findByIdAndUpdate(
+        updateData.patientId,
+        { $addToSet: { appointments: appointmentId } }
+      );
+    }
+    
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       appointmentId,
       updateData,

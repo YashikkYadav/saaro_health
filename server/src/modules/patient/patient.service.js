@@ -4,7 +4,7 @@ const Doctor = require('../doctor/doctor.model');
 // Register a new patient
 const registerPatient = async (patientData) => {
   try {
-    const { doctorId, ...patientInfo } = patientData;
+    const { doctorId, doctors, ...patientInfo } = patientData;
     
     // Check if patient with same phone number already exists
     const existingPatient = await Patient.findOne({
@@ -20,17 +20,23 @@ const registerPatient = async (patientData) => {
     const savedPatient = await newPatient.save();
     
     // If doctorId is provided, establish bidirectional relationship
-    if (doctorId) {
+    // Handle both doctorId (single) and doctors (array) formats
+    let actualDoctorId = doctorId;
+    if (!actualDoctorId && doctors && Array.isArray(doctors) && doctors.length > 0) {
+      actualDoctorId = doctors[0]; // Use the first doctor if multiple are provided
+    }
+    
+    if (actualDoctorId) {
       // Add patient to doctor's patients array
       await Doctor.findByIdAndUpdate(
-        doctorId,
+        actualDoctorId,
         { $addToSet: { patients: savedPatient._id } }
       );
       
       // Add doctor to patient's doctors array
       await Patient.findByIdAndUpdate(
         savedPatient._id,
-        { $addToSet: { doctors: doctorId } }
+        { $addToSet: { doctors: actualDoctorId } }
       );
     }
 

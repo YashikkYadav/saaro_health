@@ -72,7 +72,171 @@ router.post('/:doctorId/prescription/:patientId', createPrescription);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreatePrescriptionRequest'
+ *             type: object
+ *             properties:
+ *               doctorId:
+ *                 type: string
+ *                 description: Doctor ID
+ *               patientId:
+ *                 type: string
+ *                 description: Patient ID
+ *               vitals:
+ *                 type: object
+ *                 properties:
+ *                   bloodPressure:
+ *                     type: string
+ *                   pulse:
+ *                     type: string
+ *                   height:
+ *                     type: string
+ *                   weight:
+ *                     type: string
+ *                   temperature:
+ *                     type: string
+ *                   painScore:
+ *                     type: string
+ *                   oxygenSaturation:
+ *                     type: string
+ *                   respiratoryRate:
+ *                     type: string
+ *               complaints:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               pastHistory:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               surgicalHistory:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               drugAllergy:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               physicalExamination:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               diagnosis:
+ *                 type: object
+ *                 properties:
+ *                   provisional:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         value:
+ *                           type: string
+ *                         id:
+ *                           type: string
+ *                   final:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         value:
+ *                           type: string
+ *                         id:
+ *                           type: string
+ *               tests:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               medication:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     dosage:
+ *                       type: string
+ *                     frequency:
+ *                       type: string
+ *                     duration:
+ *                       type: string
+ *                     notes:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               advice:
+ *                 type: string
+ *               followUp:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               customSections:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     heading:
+ *                       type: string
+ *                     fields:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           label:
+ *                             type: string
+ *                           type:
+ *                             type: string
+ *                           required:
+ *                             type: boolean
+ *                           values:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 value:
+ *                                   type: string
+ *                                 id:
+ *                                   type: string
+ *               consultationType:
+ *                 type: string
+ *                 enum: [general, followup, emergency, specialty]
+ *               notes:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [draft, complete, archived]
+ *               consultationDate:
+ *                 type: string
+ *                 format: date-time
  *     responses:
  *       200:
  *         description: Consultation ended and prescription finalized
@@ -121,13 +285,107 @@ router.post('/:doctorId/prescription/:patientId/end-consultation', endConsultati
  *           schema:
  *             type: object
  *             properties:
- *               diagnosis:
+ *               doctorId:
  *                 type: string
- *               symptoms:
+ *                 description: Doctor ID
+ *               patientId:
+ *                 type: string
+ *                 description: Patient ID
+ *               vitals:
+ *                 type: object
+ *                 properties:
+ *                   bloodPressure:
+ *                     type: string
+ *                   pulse:
+ *                     type: string
+ *                   height:
+ *                     type: string
+ *                   weight:
+ *                     type: string
+ *                   temperature:
+ *                     type: string
+ *                   painScore:
+ *                     type: string
+ *                   oxygenSaturation:
+ *                     type: string
+ *                   respiratoryRate:
+ *                     type: string
+ *               complaints:
  *                 type: array
  *                 items:
- *                   type: string
- *               medicines:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               pastHistory:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               surgicalHistory:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               drugAllergy:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               physicalExamination:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     text:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               diagnosis:
+ *                 type: object
+ *                 properties:
+ *                   provisional:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         value:
+ *                           type: string
+ *                         id:
+ *                           type: string
+ *                   final:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         value:
+ *                           type: string
+ *                         id:
+ *                           type: string
+ *               tests:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     value:
+ *                       type: string
+ *                     id:
+ *                       type: string
+ *               medication:
  *                 type: array
  *                 items:
  *                   type: object
@@ -136,34 +394,60 @@ router.post('/:doctorId/prescription/:patientId/end-consultation', endConsultati
  *                       type: string
  *                     dosage:
  *                       type: string
+ *                     frequency:
+ *                       type: string
  *                     duration:
  *                       type: string
- *                     instructions:
+ *                     notes:
  *                       type: string
- *               tests:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     name:
+ *                     id:
  *                       type: string
- *                     instructions:
- *                       type: string
- *               advices:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     text:
- *                       type: string
- *               followUpDate:
+ *               advice:
  *                 type: string
- *                 format: date
+ *               followUp:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               customSections:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     heading:
+ *                       type: string
+ *                     fields:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           label:
+ *                             type: string
+ *                           type:
+ *                             type: string
+ *                           required:
+ *                             type: boolean
+ *                           values:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 value:
+ *                                   type: string
+ *                                 id:
+ *                                   type: string
+ *               consultationType:
+ *                 type: string
+ *                 enum: [general, followup, emergency, specialty]
  *               notes:
  *                 type: string
- *               visitDate:
+ *               status:
  *                 type: string
- *                 format: date
+ *                 enum: [draft, complete, archived]
+ *               consultationDate:
+ *                 type: string
+ *                 format: date-time
  *     responses:
  *       201:
  *         description: Consultation saved as past visit

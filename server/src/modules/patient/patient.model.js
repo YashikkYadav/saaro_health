@@ -72,6 +72,12 @@ const patientSchema = new mongoose.Schema(
       type: String,
       default: 'Follow-up',
     },
+    // Adding status field with enum values
+    status: {
+      type: String,
+      enum: ['Waiting', 'In Consultation', 'Completed'],
+      default: 'Waiting',
+    },
     // Adding reference to doctors
     doctors: [
       {

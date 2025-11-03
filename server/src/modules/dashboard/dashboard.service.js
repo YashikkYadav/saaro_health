@@ -400,10 +400,20 @@ const dashboardKPIsService = async (doctorId) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
     
-    // Get total patients - using the doctors array in patient schema
-    const totalPatients = await Patient.countDocuments({ 
-      doctors: { $in: [doctorObjectId] } 
-    });
+    // Get total patients - using the doctor's patients array
+    // First get the doctor to access their patients array
+    const doctor = await Doctor.findById(doctorObjectId);
+    
+    if (!doctor) {
+      throw new Error('Doctor not found');
+    }
+    
+    // Count patients from the doctor's patients array
+    // Filter out any null/undefined patient IDs to ensure accuracy
+    const validPatientIds = (doctor.patients || []).filter(patientId => 
+      patientId !== null && patientId !== undefined
+    );
+    const totalPatients = validPatientIds.length;
     
     // Get today's appointments
     const todayAppointments = await Appointment.countDocuments({
