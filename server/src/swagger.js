@@ -390,7 +390,7 @@ const options = {
         },
         Appointment: {
           type: "object",
-          required: ["doctorId", "patientId", "location", "date", "time", "type"],
+          required: ["doctorId", "patientId", "location", "date", "time", "type", "mode"],
           properties: {
             _id: {
               type: "string",
@@ -420,6 +420,11 @@ const options = {
             type: {
               type: "string",
               description: "Appointment type"
+            },
+            mode: {
+              type: "string",
+              enum: ["Online", "Offline"],
+              description: "Appointment mode"
             },
             markComplete: {
               type: "boolean",

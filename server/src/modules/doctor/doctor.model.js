@@ -53,7 +53,7 @@ const doctorSchema = new mongoose.Schema(
     // Basic doctor information
     name: { type: String ,required: true},
     rmcNumber: { type: String, unique: true, index: true,required: true },
-    phoneNumber: { type: String, index: true ,required: true },
+    phoneNumber: { type: String, index: true ,required: true,unique:true },
     email: { type: String, unique: true, index: true,required: true },
     city: { type: String ,required: true },
     address: { type: String },

@@ -46,6 +46,7 @@ const createInvoiceService = async (doctorId, invoiceData) => {
       totalAmount,
       paymentMode,
       patientNote: patientNoteData,
+      clinicName
     } = invoiceData;
     // Generate invoiceId
     let generatedInvoiceId = invoiceData.invoiceId;
@@ -74,6 +75,7 @@ const createInvoiceService = async (doctorId, invoiceData) => {
       totalAmount: totalAmount || 0,
       paymentMode: paymentMode || 'Cash',
       patientNote: patientNoteData,
+      clinicName: clinicName || ''
     });
     
     await invoice.save();
@@ -123,6 +125,7 @@ const updateInvoiceService = async (doctorId, invoiceId, updateData) => {
       totalAmount,
       paymentMode,
       patientNote: patientNoteData,
+      clinicName
     } = updateData;
     
     // Update existing invoice
@@ -141,6 +144,7 @@ const updateInvoiceService = async (doctorId, invoiceId, updateData) => {
         totalAmount,
         paymentMode,
         patientNote: patientNoteData,
+        clinicName: clinicName || ''
       },
       { new: true }
     );
@@ -543,7 +547,7 @@ const exportInvoicesAsXLSX = async (invoices, filters = {}) => {
 // Update an invoice
 const updateInvoice = async (doctorId, invoiceId, updateData) => {
   try {
-    const { patientId, name, uid, phone, paymentStatus, privateNote, items, additionalDiscountAmount, totalAmount, paymentMode, patientNote } = updateData;
+    const { patientId, name, uid, phone, paymentStatus, privateNote, items, additionalDiscountAmount, totalAmount, paymentMode, patientNote, clinicName } = updateData;
     
     const updateObject = {};
     
@@ -558,6 +562,7 @@ const updateInvoice = async (doctorId, invoiceId, updateData) => {
     if (totalAmount) updateObject.totalAmount = totalAmount;
     if (paymentMode) updateObject.paymentMode = paymentMode;
     if (patientNote !== undefined) updateObject.patientNote = patientNote;
+    if (clinicName !== undefined) updateObject.clinicName = clinicName;
 
     const invoice = await Invoice.findByIdAndUpdate(
       invoiceId,

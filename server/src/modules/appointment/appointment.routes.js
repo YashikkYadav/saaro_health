@@ -51,6 +51,7 @@ const router = express.Router();
  *               - time
  *               - location
  *               - type
+ *               - mode
  *             properties:
  *               patientId:
  *                 type: string
@@ -68,6 +69,10 @@ const router = express.Router();
  *               type:
  *                 type: string
  *                 description: Appointment type
+ *               mode:
+ *                 type: string
+ *                 enum: [Online, Offline]
+ *                 description: Appointment mode
  *               notes:
  *                 type: string
  *                 description: Additional notes
@@ -142,6 +147,7 @@ router.post('/:doctorId/book-appointment', bookAppointment);
  *               - time
  *               - location
  *               - type
+ *               - mode
  *             properties:
  *               patientId:
  *                 type: string
@@ -159,6 +165,10 @@ router.post('/:doctorId/book-appointment', bookAppointment);
  *               type:
  *                 type: string
  *                 description: Appointment type
+ *               mode:
+ *                 type: string
+ *                 enum: [Online, Offline]
+ *                 description: Appointment mode
  *               notes:
  *                 type: string
  *                 description: Additional notes
@@ -447,6 +457,9 @@ router.patch('/update-status', updateAppointmentStatus);
  *                 enum: [manual, public_booking, qr_code, whatsapp]
  *               type:
  *                 type: string
+ *               mode:
+ *                 type: string
+ *                 enum: [Online, Offline]
  *     responses:
  *       200:
  *         description: Appointment updated successfully
@@ -621,9 +634,9 @@ router.get('/:doctorId/locations', getLocations);
 
 /**
  * @swagger
- * /api/appointments/{doctorId}/{locationId}/dates:
+ * /api/appointments/{doctorId}/dates:
  *   get:
- *     summary: Get appointment dates for a doctor at a location
+ *     summary: Get appointment dates for a doctor
  *     tags: [Appointments]
  *     security:
  *       - bearerAuth: []
@@ -634,12 +647,6 @@ router.get('/:doctorId/locations', getLocations);
  *         schema:
  *           type: string
  *         description: Doctor ID
- *       - in: path
- *         name: locationId
- *         required: true
- *         schema:
- *           type: string
- *         description: Location ID
  *     responses:
  *       200:
  *         description: Dates retrieved successfully
@@ -670,12 +677,12 @@ router.get('/:doctorId/locations', getLocations);
  *                   type: string
  */
 
-// GET /:doctorId/:locationId/dates - Get appointment dates for a doctor at a location
-router.get('/:doctorId/:locationId/dates', getDates);
+// GET /:doctorId/dates - Get appointment dates for a doctor
+router.get('/:doctorId/dates', getDates);
 
 /**
  * @swagger
- * /api/appointments/{doctorId}/{locationId}/date/{date}:
+ * /api/appointments/{doctorId}/location/{locationName}/date/{date}:
  *   get:
  *     summary: Get appointment time slots for a doctor at a location on a specific date
  *     tags: [Appointments]
@@ -689,11 +696,11 @@ router.get('/:doctorId/:locationId/dates', getDates);
  *           type: string
  *         description: Doctor ID
  *       - in: path
- *         name: locationId
+ *         name: locationName
  *         required: true
  *         schema:
  *           type: string
- *         description: Location ID
+ *         description: Location name
  *       - in: path
  *         name: date
  *         required: true
@@ -718,9 +725,7 @@ router.get('/:doctorId/:locationId/dates', getDates);
  *                   items:
  *                     type: object
  *                     properties:
- *                       startTime:
- *                         type: string
- *                       endTime:
+ *                       time:
  *                         type: string
  *                       isBooked:
  *                         type: boolean
@@ -737,8 +742,8 @@ router.get('/:doctorId/:locationId/dates', getDates);
  *                   type: string
  */
 
-// GET /:doctorId/:locationId/date/:date - Get appointment time slots for a doctor at a location on a specific date
-router.get('/:doctorId/:locationId/date/:date', getTimeSlots);
+// GET /:doctorId/location/:locationName/date/:date - Get appointment time slots for a doctor at a location on a specific date
+router.get('/:doctorId/location/:locationName/date/:date', getTimeSlots);
 
 /**
  * @swagger

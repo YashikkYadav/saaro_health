@@ -17,6 +17,10 @@ const {
 // Import multer config
 const { upload, processImage } = require('./multer.config');
 
+// Import validation
+const { registerDoctorSchema, loginDoctorSchema, updateProfileSchema, changePasswordSchema } = require('./doctor.validation');
+const { validate } = require('../../middlewares/validation.middleware');
+
 const router = express.Router();
 
 /**
@@ -102,7 +106,7 @@ const router = express.Router();
  */
 
 // POST / - Register a new doctor
-router.post('/', register);
+router.post('/', validate(registerDoctorSchema), register);
 
 /**
  * @swagger
@@ -157,7 +161,7 @@ router.post('/', register);
  */
 
 // POST /access-token - Login doctor
-router.post('/access-token', login);
+router.post('/access-token', validate(loginDoctorSchema), login);
 
 /**
  * @swagger
@@ -334,8 +338,7 @@ router.get('/:doctorId', getDoctor);
  */
 
 // PUT /:doctorId/change-password - Change password
-
-router.put('/:doctorId/change-password', changePasswordController);
+router.put('/:doctorId/change-password', validate(changePasswordSchema), changePasswordController);
 
 /**
  * @swagger
@@ -486,11 +489,7 @@ router.put('/:doctorId/change-password', changePasswordController);
 
 // PUT /:doctorId/profile - Update profile
 // Support both JSON and multipart/form-data for avatar upload
-router.put('/:doctorId/profile', 
-  upload.single('avatar'), 
-  processImage, 
-  updateProfileController
-);
+router.put('/:doctorId/profile', validate(updateProfileSchema), upload.single('avatar'), processImage, updateProfileController);
 
 /**
  * @swagger

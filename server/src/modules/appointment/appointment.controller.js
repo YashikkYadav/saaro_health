@@ -155,11 +155,11 @@ const getLocations = async (req, res) => {
   }
 };
 
-// Get appointment dates for a doctor at a location
+// Get appointment dates for a doctor
 const getDates = async (req, res) => {
   try {
-    const { doctorId, locationId } = req.params;
-    const dates = await getAppointmentDates(doctorId, locationId);
+    const { doctorId } = req.params;
+    const dates = await getAppointmentDates(doctorId);
     
     return apiResponse.success(res, 'Dates retrieved successfully', { dates });
   } catch (error) {
@@ -170,8 +170,8 @@ const getDates = async (req, res) => {
 // Get appointment time slots for a doctor at a location on a specific date
 const getTimeSlots = async (req, res) => {
   try {
-    const { doctorId, locationId, date } = req.params;
-    const timeSlots = await getAppointmentTimeSlots(doctorId, locationId, date);
+    const { doctorId, locationName, date } = req.params;
+    const timeSlots = await getAppointmentTimeSlots(doctorId, locationName, date);
     
     return apiResponse.success(res, 'Time slots retrieved successfully', { timeSlots });
   } catch (error) {

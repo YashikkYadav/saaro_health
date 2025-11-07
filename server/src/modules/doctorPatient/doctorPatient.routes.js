@@ -1,1 +1,0 @@
-// DoctorPatient Routes

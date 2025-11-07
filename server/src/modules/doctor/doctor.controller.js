@@ -18,6 +18,7 @@ const fs = require('fs');
 // Register a new doctor
 const register = async (req, res) => {
   try {
+    // req.body is already validated by Zod middleware
     const doctorData = req.body;
     const result = await registerDoctor(doctorData); 
     
@@ -33,6 +34,7 @@ const register = async (req, res) => {
 // Login doctor
 const login = async (req, res) => {
   try {
+    // req.body is already validated by Zod middleware
     const { identifier, password } = req.body;
     const result = await loginDoctor(identifier, password);
     
@@ -95,6 +97,7 @@ const getDoctorProfile = async (req, res) => {
 const changePasswordController = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    // req.body is already validated by Zod middleware
     const { currentPassword, newPassword } = req.body;
     await changePassword(doctorId, currentPassword, newPassword);
     
@@ -108,6 +111,7 @@ const changePasswordController = async (req, res) => {
 const updateProfileController = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    // req.body is already validated by Zod middleware
     let updateData = req.body;
     
     // If there's an uploaded file, process it

@@ -9,6 +9,15 @@ const {
   deletePatientController
 } = require('./patient.controller');
 
+// Import validation
+const { 
+  registerPatientSchema, 
+  checkPatientExistsSchema, 
+  getAllPatientsSchema, 
+  updatePatientSchema 
+} = require('./patient.validation');
+const { validate } = require('../../middlewares/validation.middleware');
+
 const router = express.Router();
 
 /**
@@ -123,7 +132,7 @@ const router = express.Router();
 
 // Register new patient
 // POST /patient
-router.post('/', register);
+router.post('/', validate(registerPatientSchema), register);
 
 /**
  * @swagger
@@ -176,7 +185,7 @@ router.post('/', register);
 
 // Check if patient exists
 // POST /patient/check
-router.post('/check', checkExists);
+router.post('/check', validate(checkPatientExistsSchema), checkExists);
 
 /**
  * @swagger
@@ -242,7 +251,7 @@ router.post('/check', checkExists);
 
 // Get all patients with pagination and search
 // POST /patient/get-all
-router.post('/get-all', getAll);
+router.post('/get-all', validate(getAllPatientsSchema), getAll);
 
 /**
  * @swagger
@@ -419,7 +428,7 @@ router.get('/uid/:uid', getPatientByUidController);
 
 // Update patient
 // PUT /patient/:patientId
-router.put('/:patientId', update);
+router.put('/:patientId', validate(updatePatientSchema), update);
 
 /**
  * @swagger

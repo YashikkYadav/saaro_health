@@ -12,6 +12,7 @@ const apiResponse = require('../../utils/apiResponse.utils');
 // Register a new patient
 const register = async (req, res) => {
   try {
+    // req.body is already validated by Zod middleware
     const patientData = req.body;
     const patient = await registerPatient(patientData);
     
@@ -24,6 +25,7 @@ const register = async (req, res) => {
 // Check if patient exists
 const checkExists = async (req, res) => {
   try {
+    // req.body is already validated by Zod middleware
     const { phone } = req.body;
     const patient = await checkPatientExists(phone);
     
@@ -39,6 +41,7 @@ const checkExists = async (req, res) => {
 // Get all patients for a doctor with pagination and search
 const getAll = async (req, res) => {
   try {
+    // req.body is already validated by Zod middleware
     const { page = 1, limit = 10, searchQuery = '' } = req.body;
     const result = await getAllPatients(parseInt(page), parseInt(limit), searchQuery);
     
@@ -76,6 +79,7 @@ const getPatientByUidController = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { patientId } = req.params;
+    // req.body is already validated by Zod middleware
     const updateData = req.body;
     const updatedPatient = await updatePatient(patientId, updateData);
     

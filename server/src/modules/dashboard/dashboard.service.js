@@ -135,12 +135,16 @@ const getInvoice12MonthsReportService = async (doctorId) => {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
     
-    // Get invoice count for each month
+    // Get invoice count for each month - EXCLUDE REFUNDED INVOICES
     const invoiceData = await Invoice.aggregate([
       {
         $match: {
           doctorId: doctorId,
-          createdAt: { $gte: twelveMonthsAgo }
+          createdAt: { $gte: twelveMonthsAgo },
+          $or: [  // Exclude refunded invoices
+            { paymentStatus: { $ne: 'Refund' } },
+            { paymentStatus: { $exists: false } }
+          ]
         }
       },
       {
@@ -172,12 +176,16 @@ const getPayment12MonthsReportService = async (doctorId) => {
     const twelveMonthsAgo = new Date();
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
     
-    // Get payment count by mode for each month
+    // Get payment count by mode for each month - EXCLUDE REFUNDED INVOICES
     const paymentData = await Invoice.aggregate([
       {
         $match: {
           doctorId: doctorId,
-          createdAt: { $gte: twelveMonthsAgo }
+          createdAt: { $gte: twelveMonthsAgo },
+          $or: [  // Exclude refunded invoices
+            { paymentStatus: { $ne: 'Refund' } },
+            { paymentStatus: { $exists: false } }
+          ]
         }
       },
       {
@@ -250,7 +258,11 @@ const getComparisonDataService = async (doctorId) => {
       {
         $match: {
           doctorId: doctorObjectId,
-          createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+          createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+          $or: [  // Exclude refunded invoices
+            { paymentStatus: { $ne: 'Refund' } },
+            { paymentStatus: { $exists: false } }
+          ]
         }
       },
       {
@@ -281,7 +293,11 @@ const getComparisonDataService = async (doctorId) => {
       {
         $match: {
           doctorId: doctorObjectId,
-          createdAt: { $gte: startOfPreviousMonth, $lte: endOfPreviousMonth }
+          createdAt: { $gte: startOfPreviousMonth, $lte: endOfPreviousMonth },
+          $or: [  // Exclude refunded invoices
+            { paymentStatus: { $ne: 'Refund' } },
+            { paymentStatus: { $exists: false } }
+          ]
         }
       },
       {
@@ -432,12 +448,16 @@ const dashboardKPIsService = async (doctorId) => {
     // Get total invoices
     const totalInvoices = await Invoice.countDocuments({ doctorId: doctorObjectId });
     
-    // Get total revenue
+    // Get total revenue - EXCLUDE REFUNDED INVOICES
     const revenueResult = await Invoice.aggregate([
       {
         $match: {
           doctorId: doctorObjectId,
-          totalAmount: { $gt: 0 }  // Only include invoices with positive totalAmount
+          totalAmount: { $gt: 0 },  // Only include invoices with positive totalAmount
+          $or: [  // Exclude refunded invoices
+            { paymentStatus: { $ne: 'Refund' } },
+            { paymentStatus: { $exists: false } }
+          ]
         }
       },
       {

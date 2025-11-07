@@ -14,6 +14,10 @@ const invoiceSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Patient',
     },
+    clinicName: {
+      required: false,
+      type: String,
+    },
     invoiceId: {
       index: true,
       required: true,

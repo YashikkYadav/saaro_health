@@ -5,7 +5,7 @@ const Patient = require('../patient/patient.model');
 // Create a new appointment (existing function, but let's make sure it's correct)
 const createAppointment = async (appointmentData) => {
   try {
-    const { doctorId, patientId, date, time, location, type, status, source, ...otherInfo } = appointmentData;
+    const { doctorId, patientId, date, time, location, type, mode, status, source, ...otherInfo } = appointmentData;
     
     // Get patient details to embed in the appointment
     const patient = await Patient.findById(patientId).select('fullName phoneNumber');
@@ -22,6 +22,7 @@ const createAppointment = async (appointmentData) => {
       time,
       location,
       type,
+      mode,
       status: status || 'Pending',
       source: source || 'manual',
       // Embed patient data for consistent structure
@@ -58,7 +59,7 @@ const createAppointment = async (appointmentData) => {
 // Book an appointment for a doctor
 const bookAppointmentService = async (appointmentData) => {
   try {
-    const { doctorId, patientId, date, time, location, type, ...otherInfo } = appointmentData;
+    const { doctorId, patientId, date, time, location, type, mode, ...otherInfo } = appointmentData;
     
     // Get patient details to embed in the appointment
     const patient = await Patient.findById(patientId).select('fullName phoneNumber');
@@ -75,6 +76,7 @@ const bookAppointmentService = async (appointmentData) => {
       time,
       location,
       type,
+      mode,
       status: 'confirmed',
       source: 'manual',
       // Embed patient data for consistent structure
@@ -111,7 +113,7 @@ const bookAppointmentService = async (appointmentData) => {
 // Create an appointment for a doctor (admin/doctor)
 const createAppointmentForDoctorService = async (appointmentData) => {
   try {
-    const { doctorId, patientId, date, time, location, type, status, source, ...otherInfo } = appointmentData;
+    const { doctorId, patientId, date, time, location, type, mode, status, source, ...otherInfo } = appointmentData;
     
     // Get patient details to embed in the appointment
     const patient = await Patient.findById(patientId).select('fullName phoneNumber');
@@ -128,6 +130,7 @@ const createAppointmentForDoctorService = async (appointmentData) => {
       time,
       location,
       type,
+      mode,
       status: status || 'Pending',
       source: source || 'manual',
       // Embed patient data for consistent structure
@@ -442,7 +445,7 @@ const getAppointmentLocations = async (doctorId) => {
   }
 };
 
-// Get appointment dates for a doctor at a location
+// Get appointment dates for a doctor
 const getAppointmentDates = async (doctorId) => {
   try {
     // Fetch the doctor and their available dates
@@ -464,52 +467,58 @@ const getAppointmentDates = async (doctorId) => {
   }
 };
 
-// Get appointment time slots for a doctor at a location on a specific date
-const getAppointmentTimeSlots = async (doctorId, date) => {
+// Get appointment time slots for a doctor on a specific date and location
+const getAppointmentTimeSlots = async (doctorId, locationName, date) => {
   try {
-    // Fetch the doctor
+    // Fetch the doctor with OPD locations
     const doctor = await Doctor.findById(doctorId);
     
     if (!doctor) {
       throw new Error('Doctor not found');
     }
     
-    // Generate time slots based on typical office hours (9:00 AM to 5:00 PM)
-    // with 30-minute intervals
-    const timeSlots = [];
-    const startHour = 9;
-    const endHour = 17;
-    const slotDuration = 30; // minutes
+    // Find the selected location
+    const location = doctor.opdLocations.find(loc => loc.clinicName === locationName);
+    if (!location) {
+      throw new Error('Location not found');
+    }
+    
+    // Get slot duration and working hours from location settings
+    const slotDuration = location.slotMins || 30;
+    const startTime = location.startTime || "09:00";
+    const endTime = location.endTime || "17:00";
+    
+    // Parse start and end times
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
     
     // Generate time slots
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += slotDuration) {
-        // Format time as HH:MM
-        const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        const endMinute = minute + slotDuration;
-        let endHourSlot = hour;
-        let endMinuteSlot = endMinute;
-        
-        // Handle hour overflow
-        if (endMinute >= 60) {
-          endHourSlot = hour + 1;
-          endMinuteSlot = endMinute - 60;
-        }
-        
-        const endTime = `${endHourSlot.toString().padStart(2, '0')}:${endMinuteSlot.toString().padStart(2, '0')}`;
-        
-        // Check if this time slot is already booked
-        const existingAppointments = await Appointment.find({
-          doctorId: doctorId,
-          date: new Date(date),
-          time: startTime
-        });
-        
-        timeSlots.push({
-          startTime,
-          endTime,
-          isBooked: existingAppointments.length > 0
-        });
+    const timeSlots = [];
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+    
+    while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+      // Format current time
+      const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+      
+      // Check if this time slot is already booked
+      const existingAppointments = await Appointment.find({
+        doctorId: doctorId,
+        location: locationName,
+        date: new Date(date),
+        time: timeString
+      });
+      
+      timeSlots.push({
+        time: timeString,
+        isBooked: existingAppointments.length > 0
+      });
+      
+      // Add slot duration
+      currentMinute += slotDuration;
+      if (currentMinute >= 60) {
+        currentHour += Math.floor(currentMinute / 60);
+        currentMinute = currentMinute % 60;
       }
     }
     

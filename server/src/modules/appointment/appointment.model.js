@@ -30,6 +30,12 @@ const appointmentSchema = new mongoose.Schema(
       required: true,
       type: String,
     },
+    mode: {
+      required: true,
+      type: String,
+      enum: ['Online', 'Offline'],
+      default: 'Online',
+    },
     markComplete: {
       type: Boolean,
       default: false,
