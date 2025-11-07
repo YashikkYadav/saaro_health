@@ -9,6 +9,7 @@ const {
   getConsultationHistory
 } = require('./prescription.controller');
 
+
 /**
  * @swagger
  * /prescriptions/{doctorId}/prescription/{patientId}:

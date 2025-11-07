@@ -10,6 +10,16 @@ const {
   printInvoiceController
 } = require('./invoice.controller');
 
+// Import validation
+const { 
+  createInvoiceSchema,
+  updateInvoiceByInvoiceIdSchema,
+  updateInvoiceSchema,
+  exportInvoiceDataSchema,
+  getInvoicesSchema
+} = require('./invoice.validation');
+const { validate } = require('../../middlewares/validation.middleware');
+
 const router = express.Router();
 
 /**
@@ -121,7 +131,7 @@ const router = express.Router();
  */
 
 // POST /:doctorId/invoice - Create an invoice
-router.post('/:doctorId/invoice', createInvoice);
+router.post('/:doctorId/invoice', validate(createInvoiceSchema), createInvoice);
 
 /**
  * @swagger
@@ -221,7 +231,7 @@ router.post('/:doctorId/invoice', createInvoice);
  */
 
 // POST /:doctorId/invoice/update - Update an invoice by invoiceId
-router.post('/:doctorId/invoice/update', updateInvoiceByInvoiceId);
+router.post('/:doctorId/invoice/update', validate(updateInvoiceByInvoiceIdSchema), updateInvoiceByInvoiceId);
 
 /**
  * @swagger
@@ -354,7 +364,7 @@ router.get('/:doctorId/invoice', getInvoices);
  */
 
 // GET /:doctorId/invoice/export - Export invoices
-router.get('/:doctorId/invoice/export', exportInvoiceData);
+router.get('/:doctorId/invoice/export',exportInvoiceData);
 
 /**
  * @swagger
@@ -449,7 +459,7 @@ router.get('/:doctorId/invoice/export', exportInvoiceData);
  */
 
 // PUT /:doctorId/invoice/:invoiceId - Update an invoice
-router.put('/:doctorId/invoice/:invoiceId', updateInvoiceController);
+router.put('/:doctorId/invoice/:invoiceId', validate(updateInvoiceSchema), updateInvoiceController);
 
 /**
  * @swagger

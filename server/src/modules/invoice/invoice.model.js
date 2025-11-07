@@ -15,7 +15,7 @@ const invoiceSchema = new mongoose.Schema(
       ref: 'Patient',
     },
     clinicName: {
-      required: false,
+      required: true,
       type: String,
     },
     invoiceId: {

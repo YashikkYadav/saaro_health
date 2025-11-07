@@ -376,7 +376,7 @@ router.put('/:doctorId/change-password', validate(changePasswordSchema), changeP
  *               clinicName:
  *                 type: string
  *               experience:
- *                 type: number
+ *                 type: string
  *               education:
  *                 type: string
  *               bio:
@@ -489,7 +489,23 @@ router.put('/:doctorId/change-password', validate(changePasswordSchema), changeP
 
 // PUT /:doctorId/profile - Update profile
 // Support both JSON and multipart/form-data for avatar upload
-router.put('/:doctorId/profile', validate(updateProfileSchema), upload.single('avatar'), processImage, updateProfileController);
+router.put('/:doctorId/profile', 
+  upload.single('avatar'), 
+  processImage,
+  (req, res, next) => {
+    // For multipart/form-data requests with complex data
+    if (req.file && req.body.data) {
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (parseError) {
+        return apiResponse.error(res, 'Invalid data format', 400);
+      }
+    }
+    next();
+  },
+  validate(updateProfileSchema), 
+  updateProfileController
+);
 
 /**
  * @swagger
@@ -671,7 +687,7 @@ router.get('/', getDoctors);
  *                   type: string
  */
 
-// POST /search - Get doctors by city or specialty (from request body)
+// POST /search - Search doctors by city or specialty (from request body)
 router.post('/search', getDoctorsByCityOrSpecialtyController);
 
 /**
@@ -771,7 +787,7 @@ router.post('/available-dates', getAvailableDatesController);
  *                   type: string
  */
 
-// POST /avatar - Upload doctor avatar
+// POST /avatar - Upload avatar
 router.post('/avatar', upload.single('avatar'), processImage, uploadAvatarController);
 
 /**

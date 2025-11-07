@@ -61,7 +61,7 @@ const doctorSchema = new mongoose.Schema(
     password: { type: String,required: true },
 
     // Additional doctor information
-    experience: { type: Number, default: 0 }, 
+    experience: { type: String, default: "0" }, 
     education: { type: String, default: "" },
     bio: { type: String, default: "" },
     avatar: { type: String, default: "" },

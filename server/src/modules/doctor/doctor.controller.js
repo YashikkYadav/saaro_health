@@ -111,8 +111,17 @@ const changePasswordController = async (req, res) => {
 const updateProfileController = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    // req.body is already validated by Zod middleware
     let updateData = req.body;
+    
+    // Handle multipart/form-data requests with complex data
+    if (req.file && req.body.data) {
+      // Parse the JSON data from the 'data' field
+      try {
+        updateData = JSON.parse(req.body.data);
+      } catch (parseError) {
+        return apiResponse.error(res, 'Invalid data format', 400);
+      }
+    }
     
     // If there's an uploaded file, process it
     if (req.file) {

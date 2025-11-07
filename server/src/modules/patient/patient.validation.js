@@ -1,62 +1,115 @@
 const { z } = require('zod');
 
+// Custom transformer to convert values to string and validate
+const stringValidator = z.any().transform((val) => {
+  // Convert to string if not already
+  if (val === null || val === undefined) {
+    return '';
+  }
+  return String(val);
+}).refine((val) => val !== '', { message: "Value cannot be empty" });
+
+// Custom phone number validation for exactly 10 digits
+const phoneNumberSchema = z.any().transform((val) => {
+  // Convert to string for validation
+  const strVal = String(val);
+  // Remove all non-digit characters
+  const cleanVal = strVal.replace(/\D/g, '');
+  return cleanVal;
+}).refine((val) => {
+  return /^\d{10}$/.test(val);
+}, { message: 'Phone number must be exactly 10 digits' });
+
+// Custom alternate phone number validation (allows empty or exactly 10 digits)
+const alternatePhoneNumberSchema = z.any().optional().transform((val) => {
+  // Handle undefined, null, empty string, or the number 0
+  if (val === undefined || val === null || val === "" || val === 0) {
+    return null; // Normalize empty values to null
+  }
+  
+  // Convert to string and clean
+  const strVal = String(val).replace(/\D/g, '');
+  
+  // If empty after cleaning, return null
+  if (strVal === "") {
+    return null;
+  }
+  
+  return strVal;
+}).refine((val) => {
+  // Allow null values or exactly 10 digits
+  if (val === null) {
+    return true;
+  }
+  return /^\d{10}$/.test(val);
+}, { message: 'Alternate phone number must be exactly 10 digits' });
+
+// Custom transformer to convert values to number
+const stringToNumber = z.any().transform((val) => {
+  if (val === null || val === undefined) {
+    return 0;
+  }
+  const num = Number(val);
+  return isNaN(num) ? 0 : num;
+}).refine((val) => val >= 0 && Number.isInteger(val), { message: "Age must be a non-negative integer" });
+
 // Define the patient registration schema
 const registerPatientSchema = z.object({
-  doctorId: z.string().optional(),
-  uid: z.string().min(1, "UID is required").max(50, "UID must be less than 50 characters").optional(),
-  title: z.string().min(1, "Title is required").max(20, "Title must be less than 20 characters"),
-  fullName: z.string().min(1, "Full name is required").max(100, "Full name must be less than 100 characters"),
-  // phoneNumber: z.string(),
-  spouseName: z.string().nullable().optional(),
-  // alternatePhoneNumber: z.string(),
-  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format"),
-  age: z.number().int().min(0, "Age must be a non-negative integer"),
-  gender: z.string().min(1, "Gender is required").max(20, "Gender must be less than 20 characters"),
-  email: z.string().email("Invalid email format").max(100, "Email must be less than 100 characters").optional(),
-  address: z.string().optional(),
-  bloodGroup: z.string().max(10, "Blood group must be less than 10 characters").optional(),
-  allergies: z.string().optional(),
-  tags: z.string().optional(),
-  referredBy: z.string().optional(),
-  otp: z.number().int().optional(),
-  category: z.string().max(50, "Category must be less than 50 characters").optional(),
-  status: z.enum(['Waiting', 'In Consultation', 'Completed']).optional(),
-  doctors: z.array(z.string()).optional(),
+  doctorId: z.any().optional(),
+  uid: z.any().transform(String).refine((val) => val.length > 0, { message: "UID is required" }).refine((val) => val.length <= 50, { message: "UID must be less than 50 characters" }),
+  title: z.any().transform(String).refine((val) => val.length > 0, { message: "Title is required" }).refine((val) => val.length <= 20, { message: "Title must be less than 20 characters" }),
+  fullName: z.any().transform(String).refine((val) => val.length > 0, { message: "Full name is required" }).refine((val) => val.length <= 100, { message: "Full name must be less than 100 characters" }),
+  phoneNumber: phoneNumberSchema,
+  spouseName: z.any().nullable().optional(),
+  alternatePhoneNumber: alternatePhoneNumberSchema,
+  dateOfBirth: z.any().transform(String).refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), { message: "Date of birth must be in YYYY-MM-DD format" }),
+  age: stringToNumber,
+  gender: z.any().transform(String).refine((val) => val.length > 0, { message: "Gender is required" }).refine((val) => val.length <= 20, { message: "Gender must be less than 20 characters" }),
+  email: z.any().optional().transform(String).refine((val) => val === '' || z.string().email().safeParse(val).success, { message: "Invalid email format" }).refine((val) => val.length <= 100, { message: "Email must be less than 100 characters" }),
+  address: z.any().optional(),
+  bloodGroup: z.any().optional(),
+  allergies: z.any().optional(),
+  tags: z.any().optional(),
+  referredBy: z.any().optional(),
+  otp: z.any().optional(),
+  category: z.any().optional(),
+  status: z.any().optional(),
+  doctors: z.array(z.any()).optional(),
 });
 
 // Define the check patient exists schema
 const checkPatientExistsSchema = z.object({
-  phone: z.string().min(1, "Phone number is required")
+  phone: phoneNumberSchema
 });
 
 // Define the get all patients schema
 const getAllPatientsSchema = z.object({
-  page: z.number().int().min(1, "Page must be a positive integer").optional().default(1),
-  limit: z.number().int().min(1, "Limit must be a positive integer").max(100, "Limit must be less than or equal to 100").optional().default(10),
-  searchQuery: z.string().optional().default('')
+  page: z.any().optional().default(1),
+  limit: z.any().optional().default(10),
+  searchQuery: z.any().optional().default('')
 });
 
 // Define the update patient schema
 const updatePatientSchema = z.object({
-  uid: z.string().min(1, "UID is required").max(50, "UID must be less than 50 characters").optional(),
-  title: z.string().min(1, "Title is required").max(20, "Title must be less than 20 characters").optional(),
-  fullName: z.string().min(1, "Full name is required").max(100, "Full name must be less than 100 characters").optional(),
-  phoneNumber: z.number().int().positive("Phone number must be a positive integer").optional(),
-  spouseName: z.string().nullable().optional(),
-  alternatePhoneNumber: z.number().int().positive("Alternate phone number must be a positive integer").optional(),
-  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be in YYYY-MM-DD format").optional(),
-  age: z.number().int().min(0, "Age must be a non-negative integer").optional(),
-  gender: z.string().min(1, "Gender is required").max(20, "Gender must be less than 20 characters").optional(),
-  email: z.string().email("Invalid email format").max(100, "Email must be less than 100 characters").optional(),
-  address: z.string().optional(),
-  bloodGroup: z.string().max(10, "Blood group must be less than 10 characters").optional(),
-  allergies: z.string().optional(),
-  tags: z.string().optional(),
-  referredBy: z.string().optional(),
-  otp: z.number().int().optional(),
-  category: z.string().max(50, "Category must be less than 50 characters").optional(),
-  status: z.enum(['Waiting', 'In Consultation', 'Completed']).optional(),
-  doctors: z.array(z.string()).optional(),
+  uid: z.any().optional(),
+  title: z.any().optional(),
+  fullName: z.any().optional(),
+  phoneNumber: phoneNumberSchema.optional(),
+  spouseName: z.any().nullable().optional(),
+  alternatePhoneNumber: alternatePhoneNumberSchema,
+  dateOfBirth: z.any().optional(),
+  age: z.any().optional(),
+  gender: z.any().optional(),
+  email: z.any().optional(),
+  address: z.any().optional(),
+  bloodGroup: z.any().optional(),
+  allergies: z.any().optional(),
+  tags: z.any().optional(),
+  referredBy: z.any().optional(),
+  otp: z.any().optional(),
+  category: z.any().optional(),
+  status: z.any().optional(),
+  doctors: z.array(z.any()).optional(),
 }).partial();
 
 module.exports = {

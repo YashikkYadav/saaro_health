@@ -15,6 +15,17 @@ const {
   getTimeSlots
 } = require('./appointment.controller');
 
+// Import validation schemas
+const {
+  bookAppointmentSchema,
+  createAppointmentSchema,
+  updateAppointmentStatusSchema,
+  updateAppointmentSchema,
+} = require('./appointment.validation');
+
+// Import validation middleware
+const { validate } = require('../../middlewares/validation.middleware');
+
 const router = express.Router();
 
 /**
@@ -118,7 +129,7 @@ const router = express.Router();
  */
 
 // POST /:doctorId/book-appointment - Book an appointment for a doctor
-router.post('/:doctorId/book-appointment', bookAppointment);
+router.post('/:doctorId/book-appointment', validate(bookAppointmentSchema), bookAppointment);
 
 /**
  * @swagger
@@ -217,7 +228,7 @@ router.post('/:doctorId/book-appointment', bookAppointment);
  */
 
 // POST /:doctorId - Create an appointment for a doctor (admin/doctor)
-router.post('/:doctorId', createAppointmentForDoctor);
+router.post('/:doctorId',validate(createAppointmentSchema), createAppointmentForDoctor);
 
 /**
  * @swagger
@@ -355,8 +366,8 @@ router.get('/:patientId/latest', getLatestAppointmentForPatient);
  *                   type: string
  */
 
-// GET /:patientId - Get all appointments for a patient
-router.get('/:patientId', getAppointmentsForPatient);
+// GET /:patientId - Get all appointments for a patient (with query validation)
+router.get('/:patientId',  getAppointmentsForPatient);
 
 /**
  * @swagger
@@ -410,7 +421,7 @@ router.get('/:patientId', getAppointmentsForPatient);
  */
 
 // PATCH /update-status - Update appointment status
-router.patch('/update-status', updateAppointmentStatus);
+router.patch('/update-status', validate(updateAppointmentStatusSchema), updateAppointmentStatus);
 
 /**
  * @swagger
@@ -488,7 +499,7 @@ router.patch('/update-status', updateAppointmentStatus);
  */
 
 // PATCH /:appointmentId - Update appointment
-router.patch('/:appointmentId', updateAppointment);
+router.patch('/:appointmentId', validate(updateAppointmentSchema), updateAppointment);
 
 /**
  * @swagger

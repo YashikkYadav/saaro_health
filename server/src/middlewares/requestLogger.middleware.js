@@ -7,18 +7,18 @@ const requestLogger = (req, res, next) => {
   console.log(`[${timestamp}] ${method} ${url}`);
   
   // Capture response data
-  // const originalSend = res.send;
-  // res.send = function(data) {
-  //   // Log response details
-  //   const responseTime = Date.now() - req.timestamp;
-  //   console.log(`[${new Date().toISOString()}] ${method} ${url} - Status: ${res.statusCode} - Response Time: ${responseTime}ms`);
+  const originalSend = res.send;
+  res.send = function(data) {
+    // Log response details
+    const responseTime = Date.now() - req.timestamp;
+    console.log(`[${new Date().toISOString()}] ${method} ${url} - Status: ${res.statusCode} - Response Time: ${responseTime}ms`);
     
-  //   // Call the original send method
-  //   originalSend.call(this, data);
-  // };
+    // Call the original send method
+    originalSend.call(this, data);
+  };
   
-  // // Add timestamp to request for calculating response time
-  // req.timestamp = Date.now();
+  // Add timestamp to request for calculating response time
+  req.timestamp = Date.now();
   
   next();
 };

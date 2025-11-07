@@ -93,7 +93,7 @@ const prescriptionSchema = new mongoose.Schema(
         }]
       }]
     }],
-    // Legacy fields for backward compatibility
+    // Legacy fields for backward compatibility (removed conflicting duplicates)
     bloodPressure: {
       type: String,
       default: null,
@@ -118,27 +118,11 @@ const prescriptionSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    complaints: [{
-      type: String,
-      default: null,
-    }],
     history: [{
       type: String,
       default: null,
     }],
     drugHistory: [
-      {
-        name: {
-          type: String,
-          default: null,
-        },
-        details: {
-          type: String,
-          default: null,
-        },
-      },
-    ],
-    drugAllergy: [
       {
         name: {
           type: String,
@@ -170,25 +154,9 @@ const prescriptionSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    physicalExamination: [{
-      type: String,
-      default: null,
-    }],
     investigationsAdviced: [
       {
         name: {
-          type: String,
-          default: null,
-        },
-        details: {
-          type: String,
-          default: null,
-        },
-      },
-    ],
-    diagnosis: [
-      {
-        type: {
           type: String,
           default: null,
         },
@@ -226,20 +194,6 @@ const prescriptionSchema = new mongoose.Schema(
         },
       },
     ],
-    advice: [{
-      type: String,
-      default: null,
-    }],
-    followUp: {
-      days: {
-        type: String,
-        default: null,
-      },
-      date: {
-        type: String,
-        default: null,
-      },
-    },
     referredTo: [{
       name: {
         type: String,

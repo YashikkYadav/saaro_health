@@ -9,7 +9,7 @@ const {
 const apiResponse = require('../../utils/apiResponse.utils');
 
 /**
- * Create prescription
+ * Create or update a prescription draft
  * POST /:doctorId/prescription/:patientId
  */
 const createPrescriptionController = async (req, res) => {

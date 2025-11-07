@@ -17,17 +17,31 @@ const patientSchema = new mongoose.Schema(
       type: String,
     },
     phoneNumber: {
+      type: String,
+      required: [true, "Phone number is required"],
+      validate: {
+        validator: function (v) {
+          // Exactly 10 digits
+          return /^\d{10}$/.test(v);
+        },
+        message: "Phone number must be exactly 10 digits",
+      },
       index: true,
-      required: true,
-      type: Number,
-      // unique: true,
     },
+
     spouseName: {
       type: String,
       default: null,
     },
     alternatePhoneNumber: {
-      type: Number,
+      type: String,
+      validate: {
+        validator: function (v) {
+          // Exactly 10 digits or empty
+          return !v || /^\d{10}$/.test(v);
+        },
+        message: "Alternate phone number must be exactly 10 digits",
+      },
       default: null,
     },
     dateOfBirth: {

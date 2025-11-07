@@ -1,80 +1,159 @@
 const { z } = require('zod');
 
-// Define the doctor registration schema
+// Custom validation for image files
+const imageValidation = z.any().refine((value) => {
+  if (!value) return true; // Allow empty values
+  const strVal = String(value);
+  // Check if it's a valid image URL or file path
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(strVal) || strVal.startsWith('data:image/');
+}, {
+  message: "Must be a valid image file (jpg, jpeg, png, gif, webp)"
+});
+
+// Custom validation for strong password
+const strongPassword = z.any().transform(String).refine((value) => value.length >= 8, {
+    message: "Password must be at least 8 characters long"
+  })
+  .refine((value) => value.length <= 100, {
+    message: "Password must be less than 100 characters"
+  })
+  .refine((value) => /[a-z]/.test(value), {
+    message: "Password must contain at least one lowercase letter"
+  })
+  .refine((value) => /[A-Z]/.test(value), {
+    message: "Password must contain at least one uppercase letter"
+  })
+  .refine((value) => /[0-9]/.test(value), {
+    message: "Password must contain at least one number"
+  })
+  .refine((value) => /[^a-zA-Z0-9]/.test(value), {
+    message: "Password must contain at least one special character"
+  });
+
+// Define the doctor registration schema with flexible types
 const registerDoctorSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
-  rmcNumber: z.string().min(1, "RMC Number is required").max(50, "RMC Number must be less than 50 characters"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits").max(15, "Phone number must be less than 15 digits"),
-  email: z.string().email("Invalid email format").min(1, "Email is required").max(100, "Email must be less than 100 characters"),
-  city: z.string().min(1, "City is required").max(50, "City must be less than 50 characters"),
-  address: z.string().optional(),
-  clinicName: z.string().nullable().optional(),
-  password: z.string().min(6, "Password must be at least 6 characters").max(100, "Password must be less than 100 characters"),
-  experience: z.number().optional().default(0),
-  education: z.string().optional().default(""),
-  bio: z.string().optional().default(""),
-  avatar: z.string().optional().default(""),
-  introduction: z.string().optional().default(""),
-  happyClients: z.number().optional().default(0),
-  about: z.string().optional().default(""),
-  qualification: z.string().optional(),
-  gender: z.string().optional(),
-  cashlessAvailable: z.boolean().optional(),
-  rating: z.string().optional(),
-  clinicAddress: z.array(z.string()).optional().default([]),
-  availableDates: z.array(z.string()).optional().default([]),
-  awards: z.array(z.string()).optional().default([]),
-  specialization: z.string().optional(),
-  surgeries: z.array(z.string()).optional().default([]),
+  name: z.any().transform(String).refine(val => val.length > 0, { message: "Name is required" }).refine(val => val.length <= 100, { message: "Name must be less than 100 characters" }),
+  rmcNumber: z.any().transform(String).refine(val => val.length > 0, { message: "RMC Number is required" }).refine(val => val.length <= 50, { message: "RMC Number must be less than 50 characters" }),
+  phoneNumber: z.any().transform(String).refine(val => val.length >= 10, { message: "Phone number must be at least 10 digits" }).refine(val => val.length <= 15, { message: "Phone number must be less than 15 digits" }),
+  email: z.any().transform(String).refine(val => val.length > 0, { message: "Email is required" }).refine(val => val.length <= 100, { message: "Email must be less than 100 characters" }).refine(val => z.string().email().safeParse(val).success, { message: "Invalid email format" }),
+  city: z.any().transform(String).refine(val => val.length > 0, { message: "City is required" }).refine(val => val.length <= 50, { message: "City must be less than 50 characters" }),
+  address: z.any().optional(),
+  clinicName: z.any().nullable().optional(),
+  experience: z.any().optional(),
+  education: z.any().optional(),
+  bio: z.any().optional(),
+  avatar: imageValidation.optional().default(""),
+  introduction: z.any().optional().default(""),
+  happyClients: z.any().transform(val => {
+    const num = Number(val);
+    return isNaN(num) ? 0 : num;
+  }).optional().default(0),
+  about: z.any().optional().default(""),
+  qualification: z.any().optional(),
+  gender: z.any().optional(),
+  cashlessAvailable: z.any().optional().transform(Boolean),
+  rating: z.any().optional(),
+  clinicAddress: z.array(z.any()).optional().default([]),
+  availableDates: z.array(z.any()).optional().default([]),
+  awards: z.array(z.any()).optional().default([]),
+  specialization: z.any().optional(),
+  surgeries: z.array(z.any()).optional().default([]),
+  opdLocations: z.array(z.object({
+    clinicName: z.any().optional(),
+    city: z.any().optional(),
+    address: z.any().optional(),
+    days: z.object({
+      Mon: z.any().optional(),
+      Tue: z.any().optional(),
+      Wed: z.any().optional(),
+      Thu: z.any().optional(),
+      Fri: z.any().optional(),
+      Sat: z.any().optional(),
+      Sun: z.any().optional()
+    }).optional(),
+    startTime: z.any().optional(),
+    endTime: z.any().optional(),
+    slotMins: z.any().optional(),
+    active: z.any().optional(),
+    mapLocation: z.object({
+      lat: z.any().optional(),
+      lng: z.any().optional()
+    }).nullable().optional()
+  })).optional(),
   unavailabilityDate: z.object({
-    from: z.date().optional(),
-    to: z.date().optional()
+    from: z.any().optional(),
+    to: z.any().optional()
   }).optional(),
-  availabilityAfter: z.number().optional()
+  availabilityAfter: z.any().optional()
 });
 
 // Define the login schema
 const loginDoctorSchema = z.object({
-  identifier: z.string().min(1, "Email or phone number is required"),
-  password: z.string().min(1, "Password is required")
+  identifier: z.any().transform(String).refine(val => val.length > 0, { message: "Email or phone number is required" }),
+  password: z.any().transform(String).refine(val => val.length > 0, { message: "Password is required" })
 });
 
 // Define the update profile schema
 const updateProfileSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters").optional(),
-  rmcNumber: z.string().min(1, "RMC Number is required").max(50, "RMC Number must be less than 50 characters").optional(),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits").max(15, "Phone number must be less than 15 digits").optional(),
-  email: z.string().email("Invalid email format").min(1, "Email is required").max(100, "Email must be less than 100 characters").optional(),
-  city: z.string().min(1, "City is required").max(50, "City must be less than 50 characters").optional(),
-  address: z.string().optional(),
-  clinicName: z.string().nullable().optional(),
-  experience: z.number().optional(),
-  education: z.string().optional(),
-  bio: z.string().optional(),
-  avatar: z.string().optional(),
-  introduction: z.string().optional(),
-  happyClients: z.number().optional(),
-  about: z.string().optional(),
-  qualification: z.string().optional(),
-  gender: z.string().optional(),
-  cashlessAvailable: z.boolean().optional(),
-  rating: z.string().optional(),
-  clinicAddress: z.array(z.string()).optional(),
-  availableDates: z.array(z.string()).optional(),
-  awards: z.array(z.string()).optional(),
-  specialization: z.string().optional(),
-  surgeries: z.array(z.string()).optional(),
-  unavailabilityDate: z.object({
-    from: z.date().optional(),
-    to: z.date().optional()
+  name: z.any().transform(String).refine(val => val.length > 0, { message: "Name is required" }).refine(val => val.length <= 100, { message: "Name must be less than 100 characters" }).optional(),
+  rmcNumber: z.any().transform(String).refine(val => val.length > 0, { message: "RMC Number is required" }).refine(val => val.length <= 50, { message: "RMC Number must be less than 50 characters" }).optional(),
+  phoneNumber: z.any().transform(String).refine(val => val.length >= 10, { message: "Phone number must be at least 10 digits" }).refine(val => val.length <= 15, { message: "Phone number must be less than 15 digits" }).optional(),
+  email: z.any().transform(String).refine(val => val.length > 0, { message: "Email is required" }).refine(val => val.length <= 100, { message: "Email must be less than 100 characters" }).refine(val => z.string().email().safeParse(val).success, { message: "Invalid email format" }).optional(),
+  city: z.any().transform(String).refine(val => val.length > 0, { message: "City is required" }).refine(val => val.length <= 50, { message: "City must be less than 50 characters" }).optional(),
+  address: z.any().optional(),
+  clinicName: z.any().nullable().optional(),
+  experience: z.any().optional(),
+  education: z.any().optional(),
+  bio: z.any().optional(),
+  avatar: imageValidation.optional(),
+  introduction: z.any().optional(),
+  happyClients: z.any().transform(val => {
+    const num = Number(val);
+    return isNaN(num) ? 0 : num;
   }).optional(),
-  availabilityAfter: z.number().optional()
+  about: z.any().optional(),
+  qualification: z.any().optional(),
+  gender: z.any().optional(),
+  cashlessAvailable: z.any().optional().transform(Boolean),
+  rating: z.any().optional(),
+  clinicAddress: z.array(z.any()).optional(),
+  availableDates: z.array(z.any()).optional(),
+  awards: z.array(z.any()).optional(),
+  specialization: z.any().optional(),
+  surgeries: z.array(z.any()).optional(),
+  opdLocations: z.array(z.object({
+    clinicName: z.any().optional(),
+    city: z.any().optional(),
+    address: z.any().optional(),
+    days: z.object({
+      Mon: z.any().optional(),
+      Tue: z.any().optional(),
+      Wed: z.any().optional(),
+      Thu: z.any().optional(),
+      Fri: z.any().optional(),
+      Sat: z.any().optional(),
+      Sun: z.any().optional()
+    }).optional(),
+    startTime: z.any().optional(),
+    endTime: z.any().optional(),
+    slotMins: z.any().optional(),
+    active: z.any().optional(),
+    mapLocation: z.object({
+      lat: z.any().optional(),
+      lng: z.any().optional()
+    }).nullable().optional()
+  })).optional(),
+  unavailabilityDate: z.object({
+    from: z.any().optional(),
+    to: z.any().optional()
+  }).optional(),
+  availabilityAfter: z.any().optional()
 });
 
 // Define the change password schema
 const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(6, "New password must be at least 6 characters").max(100, "New password must be less than 100 characters")
+  currentPassword: z.any().transform(String).refine(val => val.length > 0, { message: "Current password is required" }),
+  newPassword: strongPassword
 });
 
 module.exports = {

@@ -1,11 +1,12 @@
 const Prescription = require('./prescription.model');
+const apiResponse = require('../../utils/apiResponse.utils');
 
 /**
- * Create a new prescription or update existing draft
+ * Create or update a prescription draft
  * @param {string} doctorId
  * @param {string} patientId
  * @param {Object} prescriptionData
- * @returns {Object} Result with prescription and status
+ * @returns {Object} Result with prescription
  */
 const createPrescription = async (doctorId, patientId, prescriptionData) => {
   try {
@@ -20,19 +21,13 @@ const createPrescription = async (doctorId, patientId, prescriptionData) => {
       // Update existing draft
       prescription = await Prescription.findByIdAndUpdate(
         prescription._id,
-        { 
+        {
           ...prescriptionData,
           doctorId,
-          patientId,
-          status: 'draft'
+          patientId
         },
         { new: true }
       );
-      return {
-        success: true,
-        message: 'Prescription draft updated successfully',
-        prescription
-      };
     } else {
       // Create new draft prescription
       prescription = new Prescription({
@@ -42,12 +37,13 @@ const createPrescription = async (doctorId, patientId, prescriptionData) => {
         status: 'draft'
       });
       await prescription.save();
-      return {
-        success: true,
-        message: 'Prescription draft created successfully',
-        prescription
-      };
     }
+
+    return {
+      success: true,
+      message: 'Prescription draft created/updated successfully',
+      prescription
+    };
   } catch (error) {
     return {
       success: false,
@@ -73,12 +69,65 @@ const endConsultation = async (doctorId, patientId, prescriptionData) => {
       status: 'draft'
     });
 
+    // Clean up the data to ensure it matches the model structure
+    const cleanData = {};
+    
+    // Copy all fields from prescriptionData
+    Object.keys(prescriptionData).forEach(key => {
+      cleanData[key] = prescriptionData[key];
+    });
+    
+    // Ensure proper data types for array fields
+    if (cleanData.complaints && !Array.isArray(cleanData.complaints)) {
+      cleanData.complaints = [];
+    }
+    
+    if (cleanData.physicalExamination && !Array.isArray(cleanData.physicalExamination)) {
+      cleanData.physicalExamination = [];
+    }
+    
+    if (cleanData.pastHistory && !Array.isArray(cleanData.pastHistory)) {
+      cleanData.pastHistory = [];
+    }
+    
+    if (cleanData.surgicalHistory && !Array.isArray(cleanData.surgicalHistory)) {
+      cleanData.surgicalHistory = [];
+    }
+    
+    if (cleanData.drugAllergy && !Array.isArray(cleanData.drugAllergy)) {
+      cleanData.drugAllergy = [];
+    }
+    
+    if (cleanData.tests && !Array.isArray(cleanData.tests)) {
+      cleanData.tests = [];
+    }
+    
+    if (cleanData.medication && !Array.isArray(cleanData.medication)) {
+      cleanData.medication = [];
+    }
+    
+    if (cleanData.followUp && !Array.isArray(cleanData.followUp)) {
+      cleanData.followUp = [];
+    }
+    
+    // Ensure diagnosis object structure
+    if (cleanData.diagnosis && typeof cleanData.diagnosis !== 'object') {
+      cleanData.diagnosis = { provisional: [], final: [] };
+    } else if (cleanData.diagnosis) {
+      if (!Array.isArray(cleanData.diagnosis.provisional)) {
+        cleanData.diagnosis.provisional = [];
+      }
+      if (!Array.isArray(cleanData.diagnosis.final)) {
+        cleanData.diagnosis.final = [];
+      }
+    }
+
     if (prescription) {
       // Update existing draft to complete
       prescription = await Prescription.findByIdAndUpdate(
         prescription._id,
         {
-          ...prescriptionData,
+          ...cleanData,
           doctorId,
           patientId,
           status: 'complete',
@@ -91,7 +140,7 @@ const endConsultation = async (doctorId, patientId, prescriptionData) => {
       prescription = new Prescription({
         doctorId,
         patientId,
-        ...prescriptionData,
+        ...cleanData,
         status: 'complete',
         consultationDate: new Date()
       });
@@ -108,6 +157,7 @@ const endConsultation = async (doctorId, patientId, prescriptionData) => {
       pdfPath
     };
   } catch (error) {
+    console.error('Error in endConsultation:', error);
     return {
       success: false,
       message: 'Failed to end consultation and finalize prescription',
@@ -125,11 +175,64 @@ const endConsultation = async (doctorId, patientId, prescriptionData) => {
  */
 const savePastVisit = async (doctorId, patientId, consultationData) => {
   try {
+    // Clean up the data to ensure it matches the model structure
+    const cleanData = {};
+    
+    // Copy all fields from consultationData
+    Object.keys(consultationData).forEach(key => {
+      cleanData[key] = consultationData[key];
+    });
+    
+    // Ensure proper data types for array fields
+    if (cleanData.complaints && !Array.isArray(cleanData.complaints)) {
+      cleanData.complaints = [];
+    }
+    
+    if (cleanData.physicalExamination && !Array.isArray(cleanData.physicalExamination)) {
+      cleanData.physicalExamination = [];
+    }
+    
+    if (cleanData.pastHistory && !Array.isArray(cleanData.pastHistory)) {
+      cleanData.pastHistory = [];
+    }
+    
+    if (cleanData.surgicalHistory && !Array.isArray(cleanData.surgicalHistory)) {
+      cleanData.surgicalHistory = [];
+    }
+    
+    if (cleanData.drugAllergy && !Array.isArray(cleanData.drugAllergy)) {
+      cleanData.drugAllergy = [];
+    }
+    
+    if (cleanData.tests && !Array.isArray(cleanData.tests)) {
+      cleanData.tests = [];
+    }
+    
+    if (cleanData.medication && !Array.isArray(cleanData.medication)) {
+      cleanData.medication = [];
+    }
+    
+    if (cleanData.followUp && !Array.isArray(cleanData.followUp)) {
+      cleanData.followUp = [];
+    }
+    
+    // Ensure diagnosis object structure
+    if (cleanData.diagnosis && typeof cleanData.diagnosis !== 'object') {
+      cleanData.diagnosis = { provisional: [], final: [] };
+    } else if (cleanData.diagnosis) {
+      if (!Array.isArray(cleanData.diagnosis.provisional)) {
+        cleanData.diagnosis.provisional = [];
+      }
+      if (!Array.isArray(cleanData.diagnosis.final)) {
+        cleanData.diagnosis.final = [];
+      }
+    }
+
     // Create a new complete prescription for past visit
     const prescription = new Prescription({
       doctorId,
       patientId,
-      ...consultationData,
+      ...cleanData,
       status: 'complete',
       consultationDate: consultationData.visitDate || new Date()
     });
@@ -142,6 +245,7 @@ const savePastVisit = async (doctorId, patientId, consultationData) => {
       prescription
     };
   } catch (error) {
+    console.error('Error in savePastVisit:', error);
     return {
       success: false,
       message: 'Failed to save consultation as past visit',
